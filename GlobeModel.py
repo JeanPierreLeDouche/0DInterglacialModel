@@ -8,7 +8,7 @@ import numpy as np
 
 # simulation parameters
 dt = 10 # yrs
-time = 200 * 1e3 # yrs
+time = int(200 * 1e3) # yrs
 
 # constants
 r_e = 6371 * 1e3 # m, earth radius
@@ -21,7 +21,7 @@ a_2 = 10**16
 a_3 = 10**8
 a_4 = 10**4
 a_5 = 10**8
-a_coeffs = np.array(a_0, a_1, a_2, a_3, a_4, a_5)
+a_coeffs = np.array((a_0, a_1, a_2, a_3, a_4, a_5))
 
 # insolation
 S0 = 1360.8 
@@ -37,7 +37,7 @@ phi0 = -152.4972 # rad
 b_0 = 1
 b_1 = 1
 b_2 = 1
-b_coeffs = np.array(b_0, b_1, b_2)
+b_coeffs = np.array((b_0, b_1, b_2))
 
 #ocean temperature 
 c_0 = 1
@@ -48,6 +48,7 @@ d_0 = 1
 # atmospheric CO2
 e_0 = 270 # ppm 
 e_1 = 1
+e_coeffs = np.array((e_0, e_1))
 
 #other
 P_max = 10**3 #kg per m^2 per yr
@@ -73,7 +74,7 @@ def Insol(t):
     return S
 
 def T_surf(m, S_E, CO2, coef):
-    T = (coef[0] - coef[1] * m**(2/3))*S_E + coef[2] * np.ln(CO2)
+    T = (coef[0] - coef[1] * m**(2/3))*S_E + coef[2] * np.log(CO2)
     return T
 
 def dTodt(T_s, T_o, coef):
@@ -84,10 +85,10 @@ def dDdt(m, D, coef):
     isost_change = coef* (m/3. - D)
     return isost_change 
 
-def dCO2dt(CO2, T_o, coef):
+def dCO2dt(CO2, T_o, e_coeffs):
     # introducing a "realistic minimum temperature of the earth" from the long term record
     T_min2 = 271 # K
-    CO2_change = coef * (0.0423/(2000/dt))*CO2*(T_o - T_min2)
+    CO2_change = e_coeffs[1] * (0.0423/(2000/dt))*CO2*(T_o - T_min2)
     return CO2_change
 
 # initial values 
@@ -100,22 +101,24 @@ CO2 = 330  # ppm
 
 ### main
 
-T_o_arr = np.zeros((1, int(time/dt)))
-T_s_arr = np.zeros((1, int(time/dt)))
-m_arr = np.zeros((1, int(time/dt)))
+# declare output arrays
+T_o_arr = np.zeros((1, int(time/dt+1)))
+T_s_arr = np.zeros((1, int(time/dt +1)))
+m_arr = np.zeros((1, int(time/dt +1)))
 
-D_arr = np.zeros((1, int(time/dt)))
-I_arr = np.zeros((1, int(time/dt)))
-CO2_arr = np.zeros((1, int(time/dt)))
+D_arr = np.zeros((1, int(time/dt +1)))
+I_arr = np.zeros((1, int(time/dt +1)))
+CO2_arr = np.zeros((1, int(time/dt +1)))
 
-for t in np.arange(0, time, dt): 
+
+for t in range(0, time, dt): 
     
     # first calculate new values for all model variables using the old values
     T_o_new = T_o + dTodt(T_s, T_o, c_0)
     I_new = Insol(t)
     D_new = D + dDdt(m, D, d_0)
 
-    CO2_new = CO2 + dCO2dt(CO2, T_o, )    
+    CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )    
     m_new = m + dmdt(m, T_s, T_o, D, a_coeffs, P_max, T_min, T_ref  )
     T_s_new = T_surf(m, I, CO2, b_coeffs )                 
 
@@ -130,15 +133,14 @@ for t in np.arange(0, time, dt):
     T_s = T_s_new 
     
     # save these values to their respective array
-    T_o_arr[time] = T_o
-    T_s_arr[time] = T_s
-    D_arr[time] = D
+    T_o_arr[0,t//10] = T_o
+    T_s_arr[0,t//10] = T_s
+    D_arr[0,t//10] = D
     
-    I_arr[time] = I
-    CO2_arr[time] = CO2
-    m_arr[time] = m
-    
-    
+    I_arr[0,t//10] = I
+    CO2_arr[0,t//10] = CO2
+    m_arr[0,t//10] = m
+        
         
 
 
