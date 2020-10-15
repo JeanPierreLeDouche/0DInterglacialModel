@@ -20,8 +20,8 @@ a_0 = -10**-6
 a_1 = 10**-5
 a_2 = 10**8
 a_3 = 10**-4
-a_4 = 10**-4
-a_5 = 10**-4
+a_4 = 10**-5
+a_5 = 10**-5
 a_coeffs = np.array((a_0, a_1, a_2, a_3, a_4, a_5))
 
 # insolation
@@ -35,21 +35,24 @@ eps_period = 41040 # yr
 phi0 = -152.4972 # rad
 
 # surface temperature
-b_0 = 1.
+b_0 = 2.0*10**(-1)
 b_1 = 10.0**(-6)
-b_2 = 1.
+b_2 = 1.5*(10.0**1)
 b_coeffs = np.array((b_0, b_1, b_2))
+T_s_min = 200.
+T_s_max = 300.
 
 #ocean temperature 
-c_0 = 1.
+c_0 = 10.0**(-5)
 
 # isostatic depression
-d_0 = 1.
+d_0 = 10.0**(-8)
 
 # atmospheric CO2
 e_0 = 270. # ppm 
-e_1 = 1.
+e_1 = 10.0**(-4)
 e_coeffs = np.array((e_0, e_1))
+CO2_min = 200.
 
 #other
 P_max = 10**-3 #kg per km^2 per yr
@@ -127,11 +130,18 @@ for t in range(0, time+1, dt):
     D_new = D + dDdt(m, D, d_0)*dt                
 
     CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )*dt
+    if CO2_new < CO2_min:
+        CO2_new = CO2_min
+    
     m_new = m + dmdt(m, T_s, T_o, D, a_coeffs)*dt
     if m_new < 0:
         m_new = 0
 
-    T_s_new = T_surf(m, I, CO2, b_coeffs )                 
+    T_s_new = T_surf(m, I, CO2, b_coeffs )
+    if T_s_new > T_s_max:
+        T_s_new = T_s_max
+    if T_s_new <  T_s_min:
+        T_s_new = T_s_min                 
 
 
     # then when everything is calculated replace the values by the new ones
