@@ -5,6 +5,7 @@ Created on Thu Oct  8 11:47:29 2020
 @author: Gebruiker
 """
 import numpy as np
+import matplotlib.pyplot as pl
 
 # simulation parameters
 dt = 10 # yrs
@@ -119,7 +120,7 @@ for t in range(0, time, dt):
     D_new = D + dDdt(m, D, d_0)
 
     CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )    
-    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs, P_max, T_min, T_ref  )
+    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs, T_min, T_ref  )
     T_s_new = T_surf(m, I, CO2, b_coeffs )                 
 
     # then when everything is calculated replace the values by the new ones
@@ -149,7 +150,24 @@ for t in range(0, time, dt):
 
 
 
+## PLOTS
 
+t_axis_f = np.arange(0,time+1,dt) #year, counting up from starting point
+t_axis_r = np.zeros(len(t_axis_f)) #years ago
+for j in range(len(t_axis_r)):
+    t_axis_r[j] = t_axis_f[-(j+1)]
+
+
+# ice mass
+pl.plot(t_axis_r, m_arr[0,:], color='blue')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years ago]', fontsize=14)
+pl.ylabel('ice mass [kg]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
 
 
 
