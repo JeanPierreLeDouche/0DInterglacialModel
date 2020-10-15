@@ -97,7 +97,7 @@ T_o = 278 # K
 T_s = 280 # K 
 m = 0.4 # GMSLR 
 D = 1 # m 
-I = 240 # should be w/m^2 
+I = Insol(0)
 CO2 = 330  # ppm
 
 ### main
@@ -112,7 +112,7 @@ I_arr = np.zeros((1, int(time/dt +1)))
 CO2_arr = np.zeros((1, int(time/dt +1)))
 
 
-for t in range(0, time, dt): 
+for t in range(0, time+1, dt): 
     
     # first calculate new values for all model variables using the old values
     T_o_new = T_o + dTodt(T_s, T_o, c_0)
@@ -151,6 +151,7 @@ for t in range(0, time, dt):
 
 
 ## PLOTS
+##TODO: get time axes to show years ago
 
 t_axis_f = np.arange(0,time+1,dt) #year, counting up from starting point
 t_axis_r = np.zeros(len(t_axis_f)) #years ago
@@ -159,15 +160,76 @@ for j in range(len(t_axis_r)):
 
 
 # ice mass
-pl.plot(t_axis_r, m_arr[0,:], color='blue')
+pl.plot(t_axis_f, m_arr[0,:], color='cyan')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
-pl.xlabel('time [years ago]', fontsize=14)
+pl.xlabel('time [years]', fontsize=14)
 pl.ylabel('ice mass [kg]', fontsize=14)
 #pl.title('')
 pl.grid(True)
 pl.show()
+
+# surface temp
+pl.plot(t_axis_f, T_s_arr[0,:], color='red')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('surface temp [K]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
+
+# insolation
+pl.plot(t_axis_f, I_arr[0,:], color='orange')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('mean insolation [W m^-2]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
+
+# CO_2 concentration
+pl.plot(t_axis_f, CO2_arr[0,:], color='black')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('CO_2 concentration [ppm]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
+
+# ocean temp
+pl.plot(t_axis_f, T_o_arr[0,:], color='blue')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('ocean temp [K]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
+
+# isostatic depression
+pl.plot(t_axis_f, D_arr[0,:], color='grey')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('surface elevation [m]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
+
+
+
+
+
+
 
 
 
