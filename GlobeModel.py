@@ -55,7 +55,7 @@ P_max = 10**3 #kg per m^2 per yr
 T_ref = 273 ### ???
 T_min = 233
 
-def dmdt(m, T_s, T_o, D, coef, P_max, T_min, T_r ):
+def dmdt(m, T_s, T_o, D, coef, T_min, T_r ):
     
     # function that calculates dm/dt, input list of a coefficients as coef
     
