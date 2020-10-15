@@ -82,8 +82,10 @@ def Insol(t):
     S = S0*(np.sin(lat*np.pi/180)*np.sin(eps) + np.cos(lat*np.pi/180)*np.cos(eps))
     return S
 
-def T_surf(m, S_E, CO2, coef):
-    T = (coef[0] - coef[1] * m**(2/3))*S_E + coef[2] * np.log(CO2)
+def T_surf(m, I, CO2, coef):
+    T = (coef[0] - coef[1] * m**(2/3))*I + coef[2] * np.log(CO2)
+    # term1 = (coef[0] - coef[1] * m**(2/3))*I
+    # term2 = coef[2] * np.log(CO2)
     return T
 
 def dTodt(T_s, T_o, coef):
