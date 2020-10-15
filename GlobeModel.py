@@ -5,6 +5,8 @@ Created on Thu Oct  8 11:47:29 2020
 @author: Gebruiker
 """
 
+import numpy as np
+
 ### Impressive arithmatic
 
 a = 2
