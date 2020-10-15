@@ -6,8 +6,11 @@ Created on Thu Oct  8 11:47:29 2020
 """
 import numpy as np
 
+# simulation parameters
+dt = 10 # yrs
+time = 200 * 1e3 # yrs
+
 # constants
-dt = 10 # yrs, timestep
 r_e = 6371 * 1e3 # m, earth radius
 
 # coefficients per modelling variable (initial values)
@@ -61,7 +64,69 @@ def dmdmt(m, T_s, T_o, I, coef, P_max, T_min, T_r ):
     mass_change = accum + surf_abl + mar_abl 
     return mass_change
     
+<<<<<<< Updated upstream
 def insolation(t):
     eps = eps_min + (eps_max)*np.sin((2*np.pi*t)/eps_period + phi0)
     S = S0*(np.sin(lat*np.pi/180)*np.sin(eps) + np.cos(lat*np.pi/180)*np.cos(eps))
     return S
+=======
+def insolation():
+    a = 1  #???
+    return a
+
+def T_surf(m, S_E, CO2, coef):
+    T = (coef[0] - coef[1] * m**(2/3))*S_E + coef[2] * np.ln(CO2)
+    return T
+
+def dTodt(T_s, T_o, coef):
+    temp_change = coef * (T_s - T_o) 
+    return temp_change
+
+def dIdt(m, I, coef):
+    isost_change = coef* (m/3. - I)
+    return isost_change 
+
+def dCO2dt(CO2, T_o, coef):
+    # introducing a "realistic minimum temperature of the earth" from the long term record
+    T_min2 = 271 # K
+    CO2_change = coef * (0.0423/(2000/dt))*CO2*(T_o - T_min2)
+    return CO2_change
+
+# initial values 
+T_o = 278
+T_s = 280 
+m = 1
+I = 1 
+CO2 = 330 
+
+
+### main
+
+for t in np.arange(0, time, dt): 
+        
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> Stashed changes
