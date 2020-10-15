@@ -56,14 +56,20 @@ P_max = 10**3 #kg per m^2 per yr
 T_ref = 273 ### ???
 T_min = 233
 
-def dmdt(m, T_s, T_o, D, coef, T_min, T_r ):
+def dmdt(m, T_s, T_o, D, coef):
     
     # function that calculates dm/dt, input list of a coefficients as coef
     
-    P_sl = P_max - P_max/2 * (T_s - 273.15)
+    if T_s > T_min and T_s < 273.15:
+        P_sl = P_max*(T_s - T_min)/(273.15 - T_min)
+    elif T_s > 273.15 and T_s < 275.15:
+        P_sl = P_max - (P_max*(T_s - 273.15)/2)
+    else:
+        P_sl = 0
+    
     accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*m**(2/3)
     surf_abl = -1 * (coef[3] * T_s - coef[4]*m**(1/3))
-    mar_abl = -1 * D * (T_o - T_r)**2 
+    mar_abl = -1 * D * (T_o - T_ref)**2 
     
     mass_change = accum + surf_abl + mar_abl 
     return mass_change
@@ -119,9 +125,9 @@ for t in range(0, time+1, dt):
     I_new = Insol(t)
     D_new = D + dDdt(m, D, d_0)
 
-    CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )    
-    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs, T_min, T_ref  )
-    T_s_new = T_surf(m, I, CO2, b_coeffs )                 
+    CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs)    
+    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs)
+    T_s_new = T_surf(m, I, CO2, b_coeffs)                 
 
     # then when everything is calculated replace the values by the new ones
     
