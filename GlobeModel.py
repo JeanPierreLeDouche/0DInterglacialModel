@@ -42,6 +42,7 @@ d_1 = 1
 
 #other
 T_ref = 273 ### ???
+T_min = 233
 
 def dmdmt(m, T_s, T_o, I, coef, P_max, T_min, T_r ):
     
