@@ -59,25 +59,14 @@ T_min = 233.
 def dmdt(m, T_s, T_o, D, coef):
     
     # function that calculates dm/dt, input list of a coefficients as coef
-<<<<<<< HEAD
-    
-    if T_s > T_min and T_s < 273.15:
+    if (T_s > T_min) and (T_s < 273.15):
         P_sl = P_max*(T_s - T_min)/(273.15 - T_min)
-    elif T_s > 273.15 and T_s < 275.15:
+    elif (T_s > 273.15) and (T_s < 275.15):
         P_sl = P_max - (P_max*(T_s - 273.15)/2)
     else:
         P_sl = 0
     
-=======
-    if (T_s < 275.16) and (T_s > 273.15): 
-        P_sl = P_max - P_max/2 * (T_s - 273.15)
-    if (T_s < 273.15) and (T_s > T_min):
-        P_sl = P_max/(273.15 - T_min)     * (T_s - T_min)
-    else: 
-        P_sl = 0
->>>>>>> 7c92735cd84d91285acfea9f4ad8511e0bece128
     accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*m**(2/3)
-    
     surf_abl = -1 * (coef[3] * T_s - coef[4]*m**(1/3))
     mar_abl = -1 * D * (T_o - T_ref)**2 
     
@@ -136,22 +125,13 @@ for t in range(0, time+1, dt):
     # first calculate new values for all model variables using the old values
     T_o_new = T_o + dTodt(T_s, T_o, c_0)*dt
     I_new = Insol(t)
-    D_new = D + dDdt(m, D, d_0)*dt
+    D_new = D + dDdt(m, D, d_0)*dt                
 
-<<<<<<< HEAD
-    CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs)    
-    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs)
-    T_s_new = T_surf(m, I, CO2, b_coeffs)                 
-=======
-<<<<<<< HEAD
-    CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )    *dt
-    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs, P_max, T_min, T_ref  )*dt
-=======
-    CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )    
-    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs, T_min, T_ref  )
->>>>>>> c1527620a9d335b2955c9f1971b5c75bb89d629b
+    CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )*dt
+    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs)*dt
+
     T_s_new = T_surf(m, I, CO2, b_coeffs )                 
->>>>>>> 7c92735cd84d91285acfea9f4ad8511e0bece128
+
 
     # then when everything is calculated replace the values by the new ones
     
