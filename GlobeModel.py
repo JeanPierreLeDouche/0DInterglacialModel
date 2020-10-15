@@ -35,30 +35,31 @@ eps_period = 41040 # yr
 phi0 = -152.4972 # rad
 
 # surface temperature
-b_0 = 1
-b_1 = 1
-b_2 = 1
+b_0 = 1.
+b_1 = 1.
+b_2 = 1.
 b_coeffs = np.array((b_0, b_1, b_2))
 
 #ocean temperature 
-c_0 = 1
+c_0 = 1.
 
 # isostatic depression
-d_0 = 1
+d_0 = 1.
 
 # atmospheric CO2
-e_0 = 270 # ppm 
-e_1 = 1
+e_0 = 270. # ppm 
+e_1 = 1.
 e_coeffs = np.array((e_0, e_1))
 
 #other
 P_max = 10**3 #kg per m^2 per yr
-T_ref = 273 ### ???
-T_min = 233
+T_ref = 273. ### ???
+T_min = 233.
 
 def dmdt(m, T_s, T_o, D, coef):
     
     # function that calculates dm/dt, input list of a coefficients as coef
+<<<<<<< HEAD
     
     if T_s > T_min and T_s < 273.15:
         P_sl = P_max*(T_s - T_min)/(273.15 - T_min)
@@ -67,7 +68,16 @@ def dmdt(m, T_s, T_o, D, coef):
     else:
         P_sl = 0
     
+=======
+    if (T_s < 275.16) and (T_s > 273.15): 
+        P_sl = P_max - P_max/2 * (T_s - 273.15)
+    if (T_s < 273.15) and (T_s > T_min):
+        P_sl = P_max/(273.15 - T_min)     * (T_s - T_min)
+    else: 
+        P_sl = 0
+>>>>>>> 7c92735cd84d91285acfea9f4ad8511e0bece128
     accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*m**(2/3)
+    
     surf_abl = -1 * (coef[3] * T_s - coef[4]*m**(1/3))
     mar_abl = -1 * D * (T_o - T_ref)**2 
     
@@ -99,9 +109,12 @@ def dCO2dt(CO2, T_o, e_coeffs):
     return CO2_change
 
 # initial values 
-T_o = 278 # K 
-T_s = 280 # K 
+T_o = 278. # K 
+T_s = 280. # K 
 m = 0.4 # GMSLR 
+D = 1. # m 
+I = 240. # should be w/m^2 
+CO2 = 330.  # ppm
 D = 1 # m 
 I = Insol(0)
 CO2 = 330  # ppm
@@ -121,13 +134,24 @@ CO2_arr = np.zeros((1, int(time/dt +1)))
 for t in range(0, time+1, dt): 
     
     # first calculate new values for all model variables using the old values
-    T_o_new = T_o + dTodt(T_s, T_o, c_0)
+    T_o_new = T_o + dTodt(T_s, T_o, c_0)*dt
     I_new = Insol(t)
-    D_new = D + dDdt(m, D, d_0)
+    D_new = D + dDdt(m, D, d_0)*dt
 
+<<<<<<< HEAD
     CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs)    
     m_new = m + dmdt(m, T_s, T_o, D, a_coeffs)
     T_s_new = T_surf(m, I, CO2, b_coeffs)                 
+=======
+<<<<<<< HEAD
+    CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )    *dt
+    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs, P_max, T_min, T_ref  )*dt
+=======
+    CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )    
+    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs, T_min, T_ref  )
+>>>>>>> c1527620a9d335b2955c9f1971b5c75bb89d629b
+    T_s_new = T_surf(m, I, CO2, b_coeffs )                 
+>>>>>>> 7c92735cd84d91285acfea9f4ad8511e0bece128
 
     # then when everything is calculated replace the values by the new ones
     
