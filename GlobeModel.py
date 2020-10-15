@@ -20,10 +20,14 @@ a_4 = 10**4
 a_5 = 10**8
 a_coeffs = np.array(a_0, a_1, a_2, a_3, a_4, a_5)
 
-# insolation 
+# insolation
+S0 = 1360.8 
+lat = 45
+# obliquity
 eps_min = 0.3847 # rad
 eps_max = 0.4277 # rad
-T_period = 41040 # yr
+eps_period = 41040 # yr
+phi0 = -152.4972 # rad
 
 # surface temperature
 b_0 = 1
@@ -56,4 +60,7 @@ def dmdmt(m, T_s, T_o, I, coef, P_max, T_min, T_r ):
     mass_change = accum + surf_abl + mar_abl 
     return mass_change
     
-def insolation()
+def insolation(t):
+    eps = eps_min + (eps_max)*np.sin((2*np.pi*t)/eps_period + phi0)
+    S = S0*(np.sin(lat*np.pi/180)*np.sin(eps) + np.cos(lat*np.pi/180)*np.cos(eps))
+    return S
