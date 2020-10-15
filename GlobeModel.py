@@ -37,23 +37,24 @@ phi0 = -152.4972 # rad
 b_0 = 1
 b_1 = 1
 b_2 = 1
+b_coeffs = np.array(b_0, b_1, b_2)
 
 #ocean temperature 
 c_0 = 1
 
 # isostatic depression
-d_o = 1
+d_0 = 1
 
 # atmospheric CO2
-c_i = 270 # ppm 
-d_1 = 1
+e_0 = 270 # ppm 
+e_1 = 1
 
 #other
 P_max = 10**3 #kg per m^2 per yr
 T_ref = 273 ### ???
 T_min = 233
 
-def dmdmt(m, T_s, T_o, D, coef, P_max, T_min, T_r ):
+def dmdt(m, T_s, T_o, D, coef, P_max, T_min, T_r ):
     
     # function that calculates dm/dt, input list of a coefficients as coef
     
@@ -65,7 +66,8 @@ def dmdmt(m, T_s, T_o, D, coef, P_max, T_min, T_r ):
     mass_change = accum + surf_abl + mar_abl 
     return mass_change
     
-def insolation(t):
+def Insol(t):
+    # depends on t in years ? 
     eps = eps_min + (eps_max)*np.sin((2*np.pi*t)/eps_period + phi0)
     S = S0*(np.sin(lat*np.pi/180)*np.sin(eps) + np.cos(lat*np.pi/180)*np.cos(eps))
     return S
@@ -78,7 +80,7 @@ def dTodt(T_s, T_o, coef):
     temp_change = coef * (T_s - T_o) 
     return temp_change
 
-def dIdt(m, D, coef):
+def dDdt(m, D, coef):
     isost_change = coef* (m/3. - D)
     return isost_change 
 
@@ -107,8 +109,37 @@ I_arr = np.zeros((1, int(time/dt)))
 CO2_arr = np.zeros((1, int(time/dt)))
 
 for t in np.arange(0, time, dt): 
-                    
     
+    # first calculate new values for all model variables using the old values
+    T_o_new = T_o + dTodt(T_s, T_o, c_0)
+    I_new = Insol(t)
+    D_new = D + dDdt(m, D, d_0)
+
+    CO2_new = CO2 + dCO2dt(CO2, T_o, )    
+    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs, P_max, T_min, T_ref  )
+    T_s_new = T_surf(m, I, CO2, b_coeffs )                 
+
+    # then when everything is calculated replace the values by the new ones
+    
+    T_o = T_o_new
+    I = I_new
+    D = D_new
+    
+    CO2 = CO2_new 
+    m = m_new
+    T_s = T_s_new 
+    
+    # save these values to their respective array
+    T_o_arr[time] = T_o
+    T_s_arr[time] = T_s
+    D_arr[time] = D
+    
+    I_arr[time] = I
+    CO2_arr[time] = CO2
+    m_arr[time] = m
+    
+    
+        
 
 
 
