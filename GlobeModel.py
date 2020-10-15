@@ -5,6 +5,7 @@ Created on Thu Oct  8 11:47:29 2020
 @author: Gebruiker
 """
 import numpy as np
+import matplotlib.pyplot as pl
 
 # simulation parameters
 dt = 10 # yrs
@@ -55,7 +56,7 @@ P_max = 10**3 #kg per m^2 per yr
 T_ref = 273. ### ???
 T_min = 233.
 
-def dmdt(m, T_s, T_o, D, coef, P_max, T_min, T_r ):
+def dmdt(m, T_s, T_o, D, coef, T_min, T_r ):
     
     # function that calculates dm/dt, input list of a coefficients as coef
     if (T_s < 275.16) and (T_s > 273.15): 
@@ -103,6 +104,9 @@ m = 0.4 # GMSLR
 D = 1. # m 
 I = 240. # should be w/m^2 
 CO2 = 330.  # ppm
+D = 1 # m 
+I = Insol(0)
+CO2 = 330  # ppm
 
 ### main
 
@@ -116,15 +120,20 @@ I_arr = np.zeros((1, int(time/dt +1)))
 CO2_arr = np.zeros((1, int(time/dt +1)))
 
 
-for t in range(0, time, dt): 
+for t in range(0, time+1, dt): 
     
     # first calculate new values for all model variables using the old values
     T_o_new = T_o + dTodt(T_s, T_o, c_0)*dt
     I_new = Insol(t)
     D_new = D + dDdt(m, D, d_0)*dt
 
+<<<<<<< HEAD
     CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )    *dt
     m_new = m + dmdt(m, T_s, T_o, D, a_coeffs, P_max, T_min, T_ref  )*dt
+=======
+    CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )    
+    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs, T_min, T_ref  )
+>>>>>>> c1527620a9d335b2955c9f1971b5c75bb89d629b
     T_s_new = T_surf(m, I, CO2, b_coeffs )                 
 
     # then when everything is calculated replace the values by the new ones
@@ -152,6 +161,85 @@ for t in range(0, time, dt):
 
 
 
+
+
+
+
+
+## PLOTS
+##TODO: get time axes to show years ago
+
+t_axis_f = np.arange(0,time+1,dt) #year, counting up from starting point
+t_axis_r = np.zeros(len(t_axis_f)) #years ago
+for j in range(len(t_axis_r)):
+    t_axis_r[j] = t_axis_f[-(j+1)]
+
+
+# ice mass
+pl.plot(t_axis_f, m_arr[0,:], color='cyan')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('ice mass [kg]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
+
+# surface temp
+pl.plot(t_axis_f, T_s_arr[0,:], color='red')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('surface temp [K]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
+
+# insolation
+pl.plot(t_axis_f, I_arr[0,:], color='orange')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('mean insolation [W m^-2]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
+
+# CO_2 concentration
+pl.plot(t_axis_f, CO2_arr[0,:], color='black')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('CO_2 concentration [ppm]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
+
+# ocean temp
+pl.plot(t_axis_f, T_o_arr[0,:], color='blue')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('ocean temp [K]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
+
+# isostatic depression
+pl.plot(t_axis_f, D_arr[0,:], color='grey')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('surface elevation [m]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
 
 
 
