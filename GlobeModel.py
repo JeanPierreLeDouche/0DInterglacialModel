@@ -49,6 +49,7 @@ c_i = 270 # ppm
 d_1 = 1
 
 #other
+P_max = 10**3 #kg per m^2 per yr
 T_ref = 273 ### ???
 T_min = 233
 
