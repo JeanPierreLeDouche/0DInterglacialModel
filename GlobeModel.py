@@ -36,7 +36,7 @@ phi0 = -152.4972 # rad
 
 # surface temperature
 b_0 = 1.
-b_1 = 1.
+b_1 = 10.0**(-6)
 b_2 = 1.
 b_coeffs = np.array((b_0, b_1, b_2))
 
