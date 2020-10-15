@@ -163,9 +163,6 @@ for t in range(0, time+1, dt):
 
 
 
-
-
-
 ## PLOTS
 ##TODO: get time axes to show years ago
 
@@ -240,6 +237,9 @@ pl.ylabel('surface elevation [m]', fontsize=14)
 #pl.title('')
 pl.grid(True)
 pl.show()
+
+
+
 
 
 
