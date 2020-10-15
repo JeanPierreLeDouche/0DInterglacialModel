@@ -16,12 +16,12 @@ r_e = 6371 * 1e3 # m, earth radius
 
 # coefficients per modelling variable (initial values)
 # mass
-a_0 = -10**-10
-a_1 = 10**-9 
-a_2 = 10**16
-a_3 = 10**8
-a_4 = 10**4
-a_5 = 10**8
+a_0 = -10**-6
+a_1 = 10**-5
+a_2 = 10**8
+a_3 = 10**-4
+a_4 = 10**-4
+a_5 = 10**-4
 a_coeffs = np.array((a_0, a_1, a_2, a_3, a_4, a_5))
 
 # insolation
@@ -52,7 +52,7 @@ e_1 = 1.
 e_coeffs = np.array((e_0, e_1))
 
 #other
-P_max = 10**3 #kg per m^2 per yr
+P_max = 10**-3 #kg per km^2 per yr
 T_ref = 273. ### ???
 T_min = 233.
 
@@ -100,9 +100,8 @@ def dCO2dt(CO2, T_o, e_coeffs):
 # initial values 
 T_o = 278. # K 
 T_s = 280. # K 
-m = 0.4 # GMSLR 
+m = 10**7 # Pg ice
 D = 1. # m 
-I = 240. # should be w/m^2 
 CO2 = 330.  # ppm
 D = 1 # m 
 I = Insol(0)
@@ -129,6 +128,8 @@ for t in range(0, time+1, dt):
 
     CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )*dt
     m_new = m + dmdt(m, T_s, T_o, D, a_coeffs)*dt
+    if m_new < 0:
+        m_new = 0
 
     T_s_new = T_surf(m, I, CO2, b_coeffs )                 
 
