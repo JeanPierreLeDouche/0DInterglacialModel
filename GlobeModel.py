@@ -131,7 +131,6 @@ D_arr = np.zeros((1, int(time/dt +1)))
 I_arr = np.zeros((1, int(time/dt +1)))
 CO2_arr = np.zeros((1, int(time/dt +1)))
 
-
 for t in range(0, time+1, dt): 
     
     # first calculate new values for all model variables using the old values
