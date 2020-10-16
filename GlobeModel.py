@@ -18,10 +18,10 @@ r_e = 6371 * 1e3 # m, earth radius
 # mass
 a_0 = -10**-6
 a_1 = 10**-5
-a_2 = 10**8
-a_3 = 10**-4
-a_4 = 10**-5
-a_5 = 10**-5
+a_2 = 10**1
+a_3 = 10**-1
+a_4 = 10**0
+a_5 = 10**0
 a_coeffs = np.array((a_0, a_1, a_2, a_3, a_4, a_5))
 
 # insolation
@@ -35,22 +35,22 @@ eps_period = 41040 # yr
 phi0 = -152.4972 # rad
 
 # surface temperature
-b_0 = 2.0*10**(-1)
-b_1 = 10.0**(-6)
-b_2 = 1.5*(10.0**1)
+b_0 = 1.0*10**(-1)
+b_1 = 10.0**(-8)
+b_2 = 2*(10.0**1)
 b_coeffs = np.array((b_0, b_1, b_2))
 T_s_min = 200.
 T_s_max = 300.
 
 #ocean temperature 
-c_0 = 10.0**(-5)
+c_0 = 5*10.0**(-5)
 
 # isostatic depression
-d_0 = 10.0**(-8)
+d_0 = 10.0**(-15)
 
 # atmospheric CO2
 e_0 = 270. # ppm 
-e_1 = 10.0**(-4)
+e_1 = 5*10.0**(-7)
 e_coeffs = np.array((e_0, e_1))
 CO2_min = 200.
 
@@ -71,7 +71,7 @@ def dmdt(m, T_s, T_o, D, coef):
     
     accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*m**(2/3)
     surf_abl = -1 * (coef[3] * T_s - coef[4]*m**(1/3))
-    mar_abl = -1 * D * (T_o - T_ref)**2 
+    mar_abl = -coef[5] * D * (T_o - T_ref)**2 
     
     mass_change = accum + surf_abl + mar_abl 
     return mass_change
@@ -240,7 +240,7 @@ pl.plot(t_axis_f, D_arr[0,:], color='grey')
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [years]', fontsize=14)
-pl.ylabel('surface elevation [m]', fontsize=14)
+pl.ylabel('surface depression [m]', fontsize=14)
 #pl.title('')
 pl.grid(True)
 pl.show()
