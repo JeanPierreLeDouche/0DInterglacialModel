@@ -70,16 +70,10 @@ def dmdt(m, T_s, T_o, D, coef):
         P_sl = 0
     
     accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*m**(2/3) #need to allow accumulation when m=0
+    
+    surf_abl = -1 * (coef[3] * (T_s - T_ref) - coef[4]*m**(1/3)) #account for area, T_ref not constant
 
-    if T_s < T_ref:
-        surf_abl = 0
-    else:
-        surf_abl = -1 * (coef[3] * (T_s - T_ref) - coef[4]*m**(1/3)) #account for area
-
-    if T_o < T_ref:
-        mar_abl = 0
-    else:
-        mar_abl = -coef[5] * D * (T_o - T_ref)**2  #account for area
+    mar_abl = -coef[5] * D * (T_o - T_ref)**2  #account for area, T_ref not constant
     
     mass_change = accum + surf_abl + mar_abl 
     return mass_change
