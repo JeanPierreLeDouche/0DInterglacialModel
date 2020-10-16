@@ -19,7 +19,7 @@ r_e = 6371 * 1e3 # m, earth radius
 a_0 = -10**-6
 a_1 = 10**-5
 a_2 = 10**1
-a_3 = 10**-1
+a_3 = 10**0
 a_4 = 10**0
 a_5 = 10**0
 a_coeffs = np.array((a_0, a_1, a_2, a_3, a_4, a_5))
@@ -37,25 +37,25 @@ phi0 = -152.4972 # rad
 # surface temperature
 b_0 = 1.0*10**(-1)
 b_1 = 10.0**(-8)
-b_2 = 2*(10.0**1)
+b_2 = 3*(10.0**1)
 b_coeffs = np.array((b_0, b_1, b_2))
 T_s_min = 200.
 T_s_max = 300.
 
 #ocean temperature 
-c_0 = 5*10.0**(-5)
+c_0 = 5*10.0**(-5) #much faster time scale for ocean surface
 
 # isostatic depression
 d_0 = 10.0**(-15)
 
 # atmospheric CO2
 e_0 = 270. # ppm 
-e_1 = 5*10.0**(-7)
+e_1 = 1*10.0**(-4)
 e_coeffs = np.array((e_0, e_1))
 CO2_min = 200.
 
 #other
-P_max = 10**-3 #kg per km^2 per yr
+P_max = 10**-3 #Pg per km^2 per yr
 T_ref = 273. ### ???
 T_min = 233.
 
@@ -69,9 +69,17 @@ def dmdt(m, T_s, T_o, D, coef):
     else:
         P_sl = 0
     
-    accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*m**(2/3)
-    surf_abl = -1 * (coef[3] * T_s - coef[4]*m**(1/3))
-    mar_abl = -coef[5] * D * (T_o - T_ref)**2 
+    accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*m**(2/3) #need to allow accumulation when m=0
+
+    if T_s < T_ref:
+        surf_abl = 0
+    else:
+        surf_abl = -1 * (coef[3] * (T_s - T_ref) - coef[4]*m**(1/3)) #account for area
+
+    if T_o < T_ref:
+        mar_abl = 0
+    else:
+        mar_abl = -coef[5] * D * (T_o - T_ref)**2  #account for area
     
     mass_change = accum + surf_abl + mar_abl 
     return mass_change
@@ -83,7 +91,7 @@ def Insol(t):
     return S
 
 def T_surf(m, I, CO2, coef):
-    T = (coef[0] - coef[1] * m**(2/3))*I + coef[2] * np.log(CO2)
+    T = coef[0] - coef[1] * m**(2/3)*I + coef[2] * np.log(CO2) #coef1 needs to be not too big, recalc coef0
     # term1 = (coef[0] - coef[1] * m**(2/3))*I
     # term2 = coef[2] * np.log(CO2)
     return T
@@ -99,7 +107,7 @@ def dDdt(m, D, coef):
 def dCO2dt(CO2, T_o, e_coeffs):
     # introducing a "realistic minimum temperature of the earth" from the long term record
     T_min2 = 271 # K
-    CO2_change = e_coeffs[1] * (0.0423/(2000/dt))*CO2*(T_o - T_min2)
+    CO2_change = e_coeffs[1] * (0.0423/(2000/dt))*CO2*(T_o - T_min2) #need shorter equi time scale; should use deep ocean temp, not ocean surf
     return CO2_change
 
 # initial values 
@@ -175,6 +183,9 @@ for t in range(0, time+1, dt):
 
 ## PLOTS
 ##TODO: get time axes to show years ago
+##TODO: put all temperatures in one graph
+##TODO: plot mass change components
+##TODO: plot ice mass in GMLSE
 
 t_axis_f = np.arange(0,time+1,dt) #year, counting up from starting point
 t_axis_r = np.zeros(len(t_axis_f)) #years ago
@@ -188,7 +199,7 @@ pl.plot(t_axis_f, m_arr[0,:], color='cyan')
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [years]', fontsize=14)
-pl.ylabel('ice mass [kg]', fontsize=14)
+pl.ylabel('ice mass [Gt]', fontsize=14)
 #pl.title('')
 pl.grid(True)
 pl.show()
@@ -210,7 +221,7 @@ pl.plot(t_axis_f, I_arr[0,:], color='orange')
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [years]', fontsize=14)
-pl.ylabel('mean insolation [W m^-2]', fontsize=14)
+pl.ylabel('peak insolation [W m^-2]', fontsize=14)
 #pl.title('')
 pl.grid(True)
 pl.show()
