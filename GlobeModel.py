@@ -84,8 +84,6 @@ def Insol(t):
 
 def T_surf(m, I, CO2, coef):
     T = (coef[0] - coef[1] * m**(2/3))*I + coef[2] * np.log(CO2)
-    # term1 = (coef[0] - coef[1] * m**(2/3))*I
-    # term2 = coef[2] * np.log(CO2)
     return T
 
 def dTodt(T_s, T_o, coef):
@@ -122,7 +120,6 @@ m_arr = np.zeros((1, int(time/dt +1)))
 D_arr = np.zeros((1, int(time/dt +1)))
 I_arr = np.zeros((1, int(time/dt +1)))
 CO2_arr = np.zeros((1, int(time/dt +1)))
-
 
 for t in range(0, time+1, dt): 
     
