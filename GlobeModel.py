@@ -72,9 +72,9 @@ def dmdt(m, T_s, T_o, D, coef):
     
     accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*(coef[3] * m**(2/3))
     
-    surf_abl = -1 * (coef[4] * (T_s - T_ref) - coef[5]*m**(1/3)) #account for area, T_ref not constant
+    surf_abl = -1 * (coef[4] * (T_s - T_ref) - coef[5]*m**(1/3)) #TODO: account for area, put a factor of m^2/3 on it? write T_ref as a constant times m^2/3?
 
-    mar_abl = -coef[6] * D * (T_o - T_ref)**2  #account for area, T_ref not constant
+    mar_abl = -coef[6] * D * (T_o - T_ref)**2  #TODO: account for area, put a factor of m^2/3 on it? write T_ref as a constant times m^2/3?
     
     mass_change = accum + surf_abl + mar_abl 
     return mass_change
@@ -102,7 +102,7 @@ def dDdt(m, D, coef):
 def dCO2dt(CO2, T_o, e_coeffs):
     # introducing a "realistic minimum temperature of the earth" from the long term record
     T_min2 = 271 # K
-    CO2_change = e_coeffs[1] * (0.0423/(2000/dt))*CO2*(T_o - T_min2) #need shorter equi time scale; should use deep ocean temp, not ocean surf
+    CO2_change = e_coeffs[1] * (0.0423/(2000/dt))*CO2*(T_o - T_min2) #TODO: need shorter equi time scale; should use deep ocean temp, not ocean surf
     return CO2_change
 
 # initial values 
@@ -177,7 +177,6 @@ for t in range(0, time+1, dt):
 
 ## PLOTS
 ##TODO: get time axes to show years ago
-##TODO: put all temperatures in one graph
 ##TODO: plot mass change components
 ##TODO: plot ice mass in GMLSE
 
