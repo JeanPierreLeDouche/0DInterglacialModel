@@ -78,13 +78,16 @@ def dmdt(m, T_s, T_o, D, coef):
     
     accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*(coef[3] + m**(2/3))
     
+<<<<<<< HEAD
     surf_abl = -1 * (coef[4] * (T_s - T_ref) *m**(2/3) - coef[5]*m) #TODO: account for area, put a factor of m^2/3 on it? write T_ref as a constant times m^2/3?
+=======
     if T_s<T_ref:
         surf_abl=0
     else:
         surf_abl = -1 * (coef[4] * (T_s - T_ref) - coef[5]*m**(1/3)) #TODO: account for area, put a factor of m^2/3 on it? write T_ref as a constant times m^2/3?
 
     mar_abl = -coef[6] * D * (T_o - T_ref)**2  #TODO: account for area, put a factor of m^2/3 on it? write T_ref as a constant times m^2/3?
+>>>>>>> 637be10df79e0915b25d7ce4383291692e8f40c1
     
     if T_o > T_ref:
         mar_abl = -coef[6] * D * (T_o - T_ref)**2 * m**(2/3) #TODO: account for area, put a factor of m^2/3 on it? write T_ref as a constant times m^2/3?
