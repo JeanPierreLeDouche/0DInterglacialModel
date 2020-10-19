@@ -36,7 +36,7 @@ eps_period = 41040 # yr
 phi0 = -152.4972 # rad
 
 # surface temperature
-b_0 = 1.0*10**(-1)
+b_0 = 230 #initial guess, better to calculate at some point
 b_1 = 10.0**(-8)
 b_2 = 3*(10.0**1)
 b_coeffs = np.array((b_0, b_1, b_2))
@@ -86,7 +86,7 @@ def Insol(t):
     return S
 
 def T_surf(m, I, CO2, coef):
-    T = coef[0] - coef[1] * m**(2/3)*I + coef[2] * np.log(CO2) #coef1 needs to be not too big, recalc coef0
+    T = coef[0] - coef[1] * m**(2/3)*I + coef[2] * np.log(CO2) #recalc coef0
     # term1 = (coef[0] - coef[1] * m**(2/3))*I
     # term2 = coef[2] * np.log(CO2)
     return T
@@ -198,13 +198,14 @@ pl.ylabel('ice mass [Gt]', fontsize=14)
 pl.grid(True)
 pl.show()
 
-# surface temp
+# surface & upper ocean temp
 pl.plot(t_axis_f, T_s_arr[0,:], color='red')
+pl.plot(t_axis_f, T_o_arr[0,:], color='blue')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [years]', fontsize=14)
-pl.ylabel('surface temp [K]', fontsize=14)
+pl.ylabel('temperature [K]', fontsize=14)
 #pl.title('')
 pl.grid(True)
 pl.show()
@@ -227,17 +228,6 @@ pl.plot(t_axis_f, CO2_arr[0,:], color='black')
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [years]', fontsize=14)
 pl.ylabel('CO_2 concentration [ppm]', fontsize=14)
-#pl.title('')
-pl.grid(True)
-pl.show()
-
-# ocean temp
-pl.plot(t_axis_f, T_o_arr[0,:], color='blue')
-#pl.axis([,,,])  # define axes 
-#pl.xticks(N.arange(,,), fontsize=12) 
-#pl.yticks(N.arange(,,), fontsize=12) 
-pl.xlabel('time [years]', fontsize=14)
-pl.ylabel('ocean temp [K]', fontsize=14)
 #pl.title('')
 pl.grid(True)
 pl.show()
