@@ -37,14 +37,14 @@ phi0 = -152.4972 # rad
 
 # surface temperature
 b_0 = 230 #initial guess, better to calculate at some point
-b_1 = 10.0**(-8)
-b_2 = 3*(10.0**1)
+b_1 = 10.0**(-10)
+b_2 = 1*(10.0**1)
 b_coeffs = np.array((b_0, b_1, b_2))
 T_s_min = 200.
 T_s_max = 300.
 
 #ocean temperature 
-c_0 = 5*10.0**(-5) #much faster time scale for ocean surface
+c_0 = 5*10.0**(-4) #might need faster time scale for ocean surface
 
 # isostatic depression
 d_0 = 10.0**(-15)
