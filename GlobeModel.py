@@ -19,10 +19,11 @@ r_e = 6371 * 1e3 # m, earth radius
 a_0 = -10**-6
 a_1 = 10**-5
 a_2 = 10**1
-a_3 = 10**0
+a_3 = 10^(2)
 a_4 = 10**0
 a_5 = 10**0
-a_coeffs = np.array((a_0, a_1, a_2, a_3, a_4, a_5))
+a_6 = 10**0
+a_coeffs = np.array((a_0, a_1, a_2, a_3, a_4, a_5, a_6))
 
 # insolation
 S0 = 1360.8 
@@ -69,11 +70,11 @@ def dmdt(m, T_s, T_o, D, coef):
     else:
         P_sl = 0
     
-    accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*m**(2/3) #need to allow accumulation when m=0
+    accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*(coef[3] * m**(2/3))
     
-    surf_abl = -1 * (coef[3] * (T_s - T_ref) - coef[4]*m**(1/3)) #account for area, T_ref not constant
+    surf_abl = -1 * (coef[4] * (T_s - T_ref) - coef[5]*m**(1/3)) #account for area, T_ref not constant
 
-    mar_abl = -coef[5] * D * (T_o - T_ref)**2  #account for area, T_ref not constant
+    mar_abl = -coef[6] * D * (T_o - T_ref)**2  #account for area, T_ref not constant
     
     mass_change = accum + surf_abl + mar_abl 
     return mass_change
