@@ -4,6 +4,11 @@ Created on Thu Oct  8 11:47:29 2020
 
 @author: Gebruiker
 """
+# TO DO:
+# find initial values from paleoclimate data
+
+
+
 import numpy as np
 import matplotlib.pyplot as pl
 
@@ -19,10 +24,10 @@ r_e = 6371 * 1e3 # m, earth radius
 a_0 = -10**-6
 a_1 = 10**-5
 a_2 = 10**1
-a_3 = 10^(2)
+a_3 = 10**2
 a_4 = 10**0
-a_5 = 10**0
-a_6 = 10**0
+a_5 = 10**-2
+a_6 = 10**-2
 a_coeffs = np.array((a_0, a_1, a_2, a_3, a_4, a_5, a_6))
 
 # insolation
@@ -53,7 +58,8 @@ d_0 = 10.0**(-15)
 e_0 = 270. # ppm 
 e_1 = 1*10.0**(-4)
 e_coeffs = np.array((e_0, e_1))
-CO2_min = 200.
+CO2_min = 100.
+CO2_max = 600.
 
 #other
 P_max = 10**-3 #Pg per km^2 per yr
@@ -70,14 +76,17 @@ def dmdt(m, T_s, T_o, D, coef):
     else:
         P_sl = 0
     
-    accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*(coef[3] * m**(2/3))
+    accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*(coef[3] + m**(2/3))
     
-    surf_abl = -1 * (coef[4] * (T_s - T_ref) - coef[5]*m**(1/3)) #TODO: account for area, put a factor of m^2/3 on it? write T_ref as a constant times m^2/3?
-
-    mar_abl = -coef[6] * D * (T_o - T_ref)**2  #TODO: account for area, put a factor of m^2/3 on it? write T_ref as a constant times m^2/3?
+    surf_abl = -1 * (coef[4] * (T_s - T_ref) *m**(2/3) - coef[5]*m) #TODO: account for area, put a factor of m^2/3 on it? write T_ref as a constant times m^2/3?
     
+    if T_o > T_ref:
+        mar_abl = -coef[6] * D * (T_o - T_ref)**2 * m**(2/3) #TODO: account for area, put a factor of m^2/3 on it? write T_ref as a constant times m^2/3?
+    if T_o < T_ref:
+        mar_abl = coef[6] * D * (T_o - T_ref)**2 * m**(2/3)                                        
+                                                    
     mass_change = accum + surf_abl + mar_abl 
-    return mass_change
+    return mass_change, accum, surf_abl, mar_abl 
     
 def Insol(t):
     # depends on t in years ? 
@@ -87,9 +96,13 @@ def Insol(t):
 
 def T_surf(m, I, CO2, coef):
     T = coef[0] - coef[1] * m**(2/3)*I + coef[2] * np.log(CO2) #recalc coef0
-    # term1 = (coef[0] - coef[1] * m**(2/3))*I
-    # term2 = coef[2] * np.log(CO2)
-    return T
+    
+    term1 = coef[0]
+    print(term1)
+    term2 = -1* coef[1] * m**(2/3)*I
+    term3 = coef[2] * np.log(CO2)
+    
+    return T, term1, term2, term3
 
 def dTodt(T_s, T_o, coef):
     temp_change = coef * (T_s - T_o) 
@@ -99,10 +112,10 @@ def dDdt(m, D, coef):
     isost_change = coef* (m/3. - D)
     return isost_change 
 
-def dCO2dt(CO2, T_o, e_coeffs):
+def f_CO2(CO2, T_o, e_coeffs):
     # introducing a "realistic minimum temperature of the earth" from the long term record
     T_min2 = 271 # K
-    CO2_change = e_coeffs[1] * (0.0423/(2000/dt))*CO2*(T_o - T_min2) #TODO: need shorter equi time scale; should use deep ocean temp, not ocean surf
+    CO2_change = e_coeffs[1] * 0.0423*CO2*(T_o - T_min2) #TODO: need shorter equi time scale; should use deep ocean temp, not ocean surf
     return CO2_change
 
 # initial values 
@@ -117,6 +130,8 @@ CO2 = 330  # ppm
 
 ### main
 
+zeros = np.zeros((1, int(time/dt +1)))
+
 # declare output arrays
 T_o_arr = np.zeros((1, int(time/dt+1)))
 T_s_arr = np.zeros((1, int(time/dt +1)))
@@ -126,6 +141,14 @@ D_arr = np.zeros((1, int(time/dt +1)))
 I_arr = np.zeros((1, int(time/dt +1)))
 CO2_arr = np.zeros((1, int(time/dt +1)))
 
+m_abl_arr = np.zeros((1, int(time/dt +1)))
+acc_arr = np.zeros((1, int(time/dt +1)))
+s_abl_arr = np.zeros((1, int(time/dt +1)))
+
+comp1 = zeros
+comp2 = zeros
+comp3 = zeros
+
 for t in range(0, time+1, dt): 
     
     # first calculate new values for all model variables using the old values
@@ -133,15 +156,21 @@ for t in range(0, time+1, dt):
     I_new = Insol(t)
     D_new = D + dDdt(m, D, d_0)*dt                
 
-    CO2_new = CO2 + dCO2dt(CO2, T_o, e_coeffs )*dt
+    CO2_new = f_CO2(CO2, T_o, e_coeffs )*dt
     if CO2_new < CO2_min:
         CO2_new = CO2_min
+    if CO2_new > CO2_max:
+        CO2_new = CO2_max 
     
-    m_new = m + dmdt(m, T_s, T_o, D, a_coeffs)*dt
+    dm_dt = dmdt(m, T_s, T_o, D, a_coeffs)
+    
+    m_new = m + dm_dt[0]*dt
     if m_new < 0:
         m_new = 0
 
-    T_s_new = T_surf(m, I, CO2, b_coeffs )
+    T_surface = T_surf(m, I, CO2, b_coeffs )  
+    T_s_new = T_surface[0]
+    
     if T_s_new > T_s_max:
         T_s_new = T_s_max
     if T_s_new <  T_s_min:
@@ -166,13 +195,15 @@ for t in range(0, time+1, dt):
     I_arr[0,t//10] = I
     CO2_arr[0,t//10] = CO2
     m_arr[0,t//10] = m
-        
-        
-
-
-
-
-
+    
+    m_abl_arr[0,t//10] = dm_dt[3]
+    s_abl_arr[0,t//10] = dm_dt[2]
+    acc_arr[0, t//10] = dm_dt[1]
+    
+    comp1[0, t//10] = T_surface[1]
+    comp2[0, t//10] = T_surface[2]
+    comp3[0, t//10] = T_surface[3]
+    
 
 
 ## PLOTS
@@ -187,19 +218,24 @@ for j in range(len(t_axis_r)):
 
 
 # ice mass
-pl.plot(t_axis_f, m_arr[0,:], color='cyan')
+pl.plot(t_axis_f, np.log10(m_arr[0,:]), color='cyan', label = 'ice mass')
+pl.plot(t_axis_f, np.log10(np.abs( m_abl_arr[0,:])), color = 'blue', label = 'marine ablation')
+pl.plot(t_axis_f, np.log10(np.abs( s_abl_arr[0,:])), color = 'yellow', label = 'surface ablation')
+pl.plot(t_axis_f, np.log10(acc_arr[0,:]), color = 'orange', label = 'accumulation')
+
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [years]', fontsize=14)
 pl.ylabel('ice mass [Gt]', fontsize=14)
+pl.legend()
 #pl.title('')
 pl.grid(True)
 pl.show()
 
 # surface & upper ocean temp
-pl.plot(t_axis_f, T_s_arr[0,:], color='red')
-pl.plot(t_axis_f, T_o_arr[0,:], color='blue')
+pl.plot(t_axis_f, T_s_arr[0,:], color='red', label = 'Surface temperature')
+pl.plot(t_axis_f, T_o_arr[0,:], color='blue', label = 'Ocean temperature')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
@@ -207,6 +243,7 @@ pl.xlabel('time [years]', fontsize=14)
 pl.ylabel('temperature [K]', fontsize=14)
 #pl.title('')
 pl.grid(True)
+pl.legend()
 pl.show()
 
 # insolation
@@ -215,7 +252,7 @@ pl.plot(t_axis_f, I_arr[0,:], color='orange')
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [years]', fontsize=14)
-pl.ylabel('peak insolation [W m^-2]', fontsize=14)
+pl.ylabel(r'peak insolation [$W m^{-2}$]', fontsize=14)
 #pl.title('')
 pl.grid(True)
 pl.show()
@@ -226,7 +263,7 @@ pl.plot(t_axis_f, CO2_arr[0,:], color='black')
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [years]', fontsize=14)
-pl.ylabel('CO_2 concentration [ppm]', fontsize=14)
+pl.ylabel(r'$CO_2$ concentration [ppm]', fontsize=14)
 #pl.title('')
 pl.grid(True)
 pl.show()
@@ -243,7 +280,12 @@ pl.grid(True)
 pl.show()
 
 
-
+# diagnostics
+pl.plot(t_axis_f, comp1[0,:], color='r', label = 'component1')
+pl.plot(t_axis_f, comp2[0,:], color='r', label = 'component2')
+pl.plot(t_axis_f, comp3[0,:], color='r', label = 'component3')
+pl.grid(True)
+pl.show()
 
 
 
