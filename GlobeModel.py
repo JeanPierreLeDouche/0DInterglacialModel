@@ -42,9 +42,10 @@ phi0 = -152.4972 # rad
 
 # surface temperature
 b_0 = 230 #initial guess, better to calculate at some point
-b_1 = 10.0**(-10)
-b_2 = 1*(10.0**1)
-b_coeffs = np.array((b_0, b_1, b_2))
+b_1 = 10.0**(-1)
+b_2 = 10.0**(-4)
+b_3 = 1*(10.0**1)
+b_coeffs = np.array((b_0, b_1, b_2, b_3))
 T_s_min = 200.
 T_s_max = 300.
 
@@ -56,7 +57,7 @@ d_0 = 10.0**(-15)
 
 # atmospheric CO2
 e_0 = 270. # ppm 
-e_1 = 1*10.0**(-4)
+e_1 = 1*10.0**(-2)
 e_coeffs = np.array((e_0, e_1))
 CO2_min = 100.
 CO2_max = 600.
@@ -80,7 +81,7 @@ def dmdt(m, T_s, T_o, D, coef):
 
     if T_s > T_ref:
         surf_abl = -1 * (coef[4] * (T_s - T_ref)*m**(2/3) - coef[5]*m)
-    elif T_s >= T_ref:
+    elif T_s <= T_ref:
         surf_abl=0
 
     if T_o > T_ref:
@@ -98,11 +99,11 @@ def Insol(t):
     return S
 
 def T_surf(m, I, CO2, coef):
-    T = coef[0] - coef[1] * m**(2/3)*I + coef[2] * np.log(CO2) #recalc coef0
+    T = coef[0] + coef[1]*(1 - coef[2] * m**(2/3))*I + coef[3] * np.log(CO2) #recalc coef0
     
     term1 = coef[0]
-    term2 = -1* coef[1] * m**(2/3)*I
-    term3 = coef[2] * np.log(CO2)
+    term2 = coef[1]*(1 - coef[2] * m**(2/3))*I
+    term3 = coef[3] * np.log(CO2)
     
     return T, term1, term2, term3
 
