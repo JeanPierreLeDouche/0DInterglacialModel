@@ -101,7 +101,6 @@ def T_surf(m, I, CO2, coef):
     T = coef[0] - coef[1] * m**(2/3)*I + coef[2] * np.log(CO2) #recalc coef0
     
     term1 = coef[0]
-    print(term1)
     term2 = -1* coef[1] * m**(2/3)*I
     term3 = coef[2] * np.log(CO2)
     
@@ -148,9 +147,9 @@ m_abl_arr = np.zeros((1, int(time/dt +1)))
 acc_arr = np.zeros((1, int(time/dt +1)))
 s_abl_arr = np.zeros((1, int(time/dt +1)))
 
-comp1 = zeros
-comp2 = zeros
-comp3 = zeros
+comp1 = np.zeros(int(time/dt +1))
+comp2 = np.zeros(int(time/dt +1))
+comp3 = np.zeros(int(time/dt +1))
 
 for t in range(0, time+1, dt): 
     
@@ -203,9 +202,9 @@ for t in range(0, time+1, dt):
     s_abl_arr[0,t//10] = dm_dt[2]
     acc_arr[0, t//10] = dm_dt[1]
     
-    comp1[0, t//10] = T_surface[1]
-    comp2[0, t//10] = T_surface[2]
-    comp3[0, t//10] = T_surface[3]
+    comp1[t//10] = T_surface[1]
+    comp2[t//10] = T_surface[2]
+    comp3[t//10] = T_surface[3]
     
 
 
@@ -284,9 +283,9 @@ pl.show()
 
 
 # diagnostics
-pl.plot(t_axis_f, comp1[0,:], color='r', label = 'component1')
-pl.plot(t_axis_f, comp2[0,:], color='r', label = 'component2')
-pl.plot(t_axis_f, comp3[0,:], color='r', label = 'component3')
+pl.plot(t_axis_f, comp1[:], color='r', label = 'component1')
+pl.plot(t_axis_f, comp2[:], color='r', label = 'component2')
+pl.plot(t_axis_f, comp3[:], color='r', label = 'component3')
 pl.grid(True)
 pl.show()
 
