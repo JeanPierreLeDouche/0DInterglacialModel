@@ -41,10 +41,10 @@ eps_period = 41040 # yr
 phi0 = -152.4972 # rad
 
 # surface temperature
-b_0 = 230 #initial guess, better to calculate at some point
-b_1 = 10.0**(-1)
-b_2 = 10.0**(-4)
-b_3 = 1*(10.0**1)
+b_0 = 240 #initial guess, better to calculate at some point
+b_1 = 2 * 10.0**(-2)
+b_2 = 10.0**(-7)
+b_3 = 0.5*(10.0**1)
 b_coeffs = np.array((b_0, b_1, b_2, b_3))
 T_s_min = 200.
 T_s_max = 300.
@@ -57,7 +57,7 @@ d_0 = 10.0**(-15)
 
 # atmospheric CO2
 e_0 = 270. # ppm 
-e_1 = 1*10.0**(-2)
+e_1 = 1*10.0**(0)
 e_coeffs = np.array((e_0, e_1))
 CO2_min = 100.
 CO2_max = 600.
@@ -90,6 +90,7 @@ def dmdt(m, T_s, T_o, D, coef):
         mar_abl = coef[6] * D * (T_o - T_ref)**2 * m**(2/3)                                        
                                                     
     mass_change = accum + surf_abl + mar_abl 
+    print("mass change: ", mass_change)
     return mass_change, accum, surf_abl, mar_abl 
     
 def Insol(t):
@@ -118,7 +119,7 @@ def dDdt(m, D, coef):
 def f_CO2(CO2, T_o, e_coeffs):
     # introducing a "realistic minimum temperature of the earth" from the long term record
     T_min2 = 271 # K
-    CO2_change = e_coeffs[1] * 0.0423*CO2*(T_o - T_min2) #TODO: need shorter equi time scale; should use deep ocean temp, not ocean surf
+    CO2_change = e_coeffs[1] *(T_o - T_min2) #TODO: need shorter equi time scale; should use deep ocean temp, not ocean surf
     return CO2_change
 
 # initial values 
