@@ -4,7 +4,7 @@ Created on Thu Oct  8 11:47:29 2020
 
 @author: Gebruiker
 """
-# TO DO:
+# TODO:
 # find initial values from paleoclimate data
 
 
@@ -90,7 +90,7 @@ def dmdt(m, T_s, T_o, D, coef):
     if T_o > T_ref:
         mar_abl = -coef[6] * D * (T_o - T_ref)**2 * m**(2/3)
     elif T_o <= T_ref:
-        mar_abl = coef[6] * D * (T_o - T_ref)**2 * m**(2/3)                                        
+        mar_abl = coef[6] * D * (T_ref - T_o)**2 * m**(2/3)                                        
                                                     
     mass_change = accum + surf_abl + mar_abl 
     print("mass change: ", mass_change)
