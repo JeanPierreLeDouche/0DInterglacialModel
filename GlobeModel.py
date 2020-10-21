@@ -69,6 +69,9 @@ T_min = 233.
 
 def dmdt(m, T_s, T_o, D, coef):
     
+    # shall we make precipitation into a parabola? 
+    
+    
     # function that calculates dm/dt, input list of a coefficients as coef
     if (T_s > T_min) and (T_s < 273.15):
         P_sl = P_max*(T_s - T_min)/(273.15 - T_min)
