@@ -22,7 +22,7 @@ Gt_to_SLE_conv = 1 /( 361. * 1e3 ) # multiply value in Gt to get SLE in m
 
 # coefficients per modelling variable (initial values)
 # mass
-a_0 = -10**-6
+a_0 = -10**-6 
 a_1 = 10**-6
 a_2 = 10**2
 a_3 = 10**2
@@ -64,13 +64,10 @@ CO2_min = 100.
 CO2_max = 600.
 
 #other
-<<<<<<< Updated upstream
 P_max = 2*10**-3 #Pg per km^2 per yr
-=======
-P_max = 10**-3 #Pg per km^2 per yr
-P_max = P_max * Gt_to_SLE_conv 
 
->>>>>>> Stashed changes
+# P_max = P_max * Gt_to_SLE_conv 
+
 T_ref = 273. ### ???
 T_min = 233.
 
@@ -100,11 +97,7 @@ def dmdt(m, T_s, T_o, D, coef):
         mar_abl = coef[6] * D * (T_ref - T_o)**2 * m**(2/3)                                        
                                                     
     mass_change = accum + surf_abl + mar_abl 
-<<<<<<< Updated upstream
-    #print("mass change: ", mass_change)
-=======
-    # print("mass change: ", mass_change)
->>>>>>> Stashed changes
+
     return mass_change, accum, surf_abl, mar_abl 
     
 def Insol(t):
@@ -247,15 +240,15 @@ pl.grid(True)
 pl.show()
 
 # ice mass & components, log scale
-pl.plot(t_axis_f, np.log10(m_arr[0,:]), color='cyan', label = 'ice mass')
-pl.plot(t_axis_f, np.log10(np.abs( m_abl_arr[0,:])), color = 'blue', label = 'marine ablation')
-pl.plot(t_axis_f, np.log10(np.abs( s_abl_arr[0,:])), color = 'yellow', label = 'surface ablation')
-pl.plot(t_axis_f, np.log10(acc_arr[0,:]), color = 'orange', label = 'accumulation')
+pl.plot(t_axis_f/1000, m_arr[0,:]*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
+pl.plot(t_axis_f/1000, np.abs( m_abl_arr[0,:])*Gt_to_SLE_conv, color = 'blue', label = 'marine ablation')
+pl.plot(t_axis_f/1000, np.abs( s_abl_arr[0,:])*Gt_to_SLE_conv, color = 'yellow', label = 'surface ablation')
+pl.plot(t_axis_f/1000, acc_arr[0,:]*Gt_to_SLE_conv, color = 'orange', label = 'accumulation')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
-pl.xlabel('time [years]', fontsize=14)
-pl.ylabel('log of ice mass', fontsize=14)
+pl.xlabel('time [ka]', fontsize=14)
+pl.ylabel('Ice mass (m SLE)', fontsize=14)
 pl.legend()
 #pl.title('')
 pl.grid(True)
