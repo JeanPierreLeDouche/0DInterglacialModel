@@ -64,10 +64,13 @@ CO2_min = 100.
 CO2_max = 600.
 
 #other
+<<<<<<< Updated upstream
 P_max = 2*10**-3 #Pg per km^2 per yr
+=======
 P_max = 10**-3 #Pg per km^2 per yr
 P_max = P_max * Gt_to_SLE_conv 
 
+>>>>>>> Stashed changes
 T_ref = 273. ### ???
 T_min = 233.
 
@@ -97,8 +100,11 @@ def dmdt(m, T_s, T_o, D, coef):
         mar_abl = coef[6] * D * (T_ref - T_o)**2 * m**(2/3)                                        
                                                     
     mass_change = accum + surf_abl + mar_abl 
+<<<<<<< Updated upstream
     #print("mass change: ", mass_change)
+=======
     # print("mass change: ", mass_change)
+>>>>>>> Stashed changes
     return mass_change, accum, surf_abl, mar_abl 
     
 def Insol(t):
