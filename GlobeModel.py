@@ -53,11 +53,11 @@ T_s_max = 300.
 c_0 = 5*10.0**(-4) #might need faster time scale for ocean surface
 
 # isostatic depression
-d_0 = 10.0**(-15)
+d_0 = 10.0**(-12)
 
 # atmospheric CO2
 e_0 = 270. # ppm 
-e_1 = 1*10.0**(0)
+e_1 = 2*10.0**(0)
 e_coeffs = np.array((e_0, e_1))
 CO2_min = 100.
 CO2_max = 600.
