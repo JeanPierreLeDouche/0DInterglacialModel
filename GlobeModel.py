@@ -22,13 +22,13 @@ Gt_to_SLE_conv = 1 /( 361. * 1e3 ) # multiply value in Gt to get SLE in m
 
 # coefficients per modelling variable (initial values)
 # mass
-a_0 = -10**-6 
-a_1 = 10**-6
-a_2 = 10**2
-a_3 = 10**2
-a_4 = 10**-2
-a_5 = 10**-4
-a_6 = 10**-3
+a_0 = -10**-7
+a_1 = 10**-7
+a_2 = 1.2*10**1
+a_3 = 1*10**4
+a_4 = 2*10**-4
+a_5 = 2*10**-6
+a_6 = 2*10**-5
 a_coeffs = np.array((a_0, a_1, a_2, a_3, a_4, a_5, a_6))
 
 # insolation
@@ -42,10 +42,10 @@ eps_period = 41040 # yr
 phi0 = -152.4972 # rad
 
 # surface temperature
-b_0 = 230 #initial guess, better to calculate at some point
+b_0 = 208 #initial guess, better to calculate at some point
 b_1 = 2 * 10.0**(-2)
 b_2 = 10.0**(-9)
-b_3 = 0.5*(10.0**1)
+b_3 = 0.9*(10.0**1)
 b_coeffs = np.array((b_0, b_1, b_2, b_3))
 T_s_min = 200.
 T_s_max = 300.
@@ -58,13 +58,13 @@ d_0 = 10.0**(-12)
 
 # atmospheric CO2
 e_0 = 270. # ppm 
-e_1 = 2*10.0**(0)
+e_1 = 1*10.0**(1)
 e_coeffs = np.array((e_0, e_1))
 CO2_min = 100.
 CO2_max = 600.
 
 #other
-P_max = 2*10**-3 #Pg per km^2 per yr
+P_max = 3*10**-3 #Pg per km^2 per yr
 
 # P_max = P_max * Gt_to_SLE_conv 
 
@@ -126,7 +126,7 @@ def dDdt(m, D, coef):
 def f_CO2(CO2, T_o, e_coeffs):
     # introducing a "realistic minimum temperature of the earth" from the long term record
     T_min2 = 271 # K
-    CO2_change = e_coeffs[1] *(T_o - T_min2)
+    CO2_change = e_coeffs[1] *(T_o - T_min2) + CO2_min
     return CO2_change
 
 # initial values 
@@ -167,7 +167,7 @@ for t in range(0, time+1, dt):
     I_new = Insol(t)
     D_new = D + dDdt(m, D, d_0)*dt                
 
-    CO2_new = f_CO2(CO2, T_o, e_coeffs )*dt
+    CO2_new = f_CO2(CO2, T_o, e_coeffs )
     if CO2_new < CO2_min:
         CO2_new = CO2_min
     if CO2_new > CO2_max:
