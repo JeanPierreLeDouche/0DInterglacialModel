@@ -22,12 +22,12 @@ r_e = 6371 * 1e3 # m, earth radius
 # coefficients per modelling variable (initial values)
 # mass
 a_0 = -10**-6
-a_1 = 10**-5
+a_1 = 10**-6
 a_2 = 10**2
 a_3 = 10**2
-a_4 = 10**0
-a_5 = 10**-2
-a_6 = 10**-2
+a_4 = 10**-2
+a_5 = 10**-4
+a_6 = 10**-3
 a_coeffs = np.array((a_0, a_1, a_2, a_3, a_4, a_5, a_6))
 
 # insolation
@@ -41,9 +41,9 @@ eps_period = 41040 # yr
 phi0 = -152.4972 # rad
 
 # surface temperature
-b_0 = 240 #initial guess, better to calculate at some point
+b_0 = 230 #initial guess, better to calculate at some point
 b_1 = 2 * 10.0**(-2)
-b_2 = 10.0**(-7)
+b_2 = 10.0**(-9)
 b_3 = 0.5*(10.0**1)
 b_coeffs = np.array((b_0, b_1, b_2, b_3))
 T_s_min = 200.
@@ -63,7 +63,7 @@ CO2_min = 100.
 CO2_max = 600.
 
 #other
-P_max = 10**-3 #Pg per km^2 per yr
+P_max = 2*10**-3 #Pg per km^2 per yr
 T_ref = 273. ### ???
 T_min = 233.
 
@@ -93,7 +93,7 @@ def dmdt(m, T_s, T_o, D, coef):
         mar_abl = coef[6] * D * (T_ref - T_o)**2 * m**(2/3)                                        
                                                     
     mass_change = accum + surf_abl + mar_abl 
-    print("mass change: ", mass_change)
+    #print("mass change: ", mass_change)
     return mass_change, accum, surf_abl, mar_abl 
     
 def Insol(t):
@@ -103,10 +103,10 @@ def Insol(t):
     return S
 
 def T_surf(m, I, CO2, coef):
-    T = coef[0] + coef[1]*(1 - coef[2] * m**(2/3))*I + coef[3] * np.log(CO2) #recalc coef0
+    T = coef[0] + coef[1]*( np.max([1 - coef[2] * m**(2/3),0.2]) )*I + coef[3] * np.log(CO2) #
     
     term1 = coef[0]
-    term2 = coef[1]*(1 - coef[2] * m**(2/3))*I
+    term2 = coef[1]*( np.max([1 - coef[2] * m**(2/3),0.2]) )*I
     term3 = coef[3] * np.log(CO2)
     
     return T, term1, term2, term3
