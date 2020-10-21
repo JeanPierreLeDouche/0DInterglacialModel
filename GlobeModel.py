@@ -18,6 +18,7 @@ time = int(200 * 1e3) # yrs
 
 # constants
 r_e = 6371 * 1e3 # m, earth radius
+Gt_to_SLE_conv = 1 /( 361. * 1e3 ) # multiply value in Gt to get SLE in m
 
 # coefficients per modelling variable (initial values)
 # mass
@@ -64,6 +65,9 @@ CO2_max = 600.
 
 #other
 P_max = 2*10**-3 #Pg per km^2 per yr
+P_max = 10**-3 #Pg per km^2 per yr
+P_max = P_max * Gt_to_SLE_conv 
+
 T_ref = 273. ### ???
 T_min = 233.
 
@@ -94,6 +98,7 @@ def dmdt(m, T_s, T_o, D, coef):
                                                     
     mass_change = accum + surf_abl + mar_abl 
     #print("mass change: ", mass_change)
+    # print("mass change: ", mass_change)
     return mass_change, accum, surf_abl, mar_abl 
     
 def Insol(t):
