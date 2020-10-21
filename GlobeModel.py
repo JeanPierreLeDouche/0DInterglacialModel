@@ -23,7 +23,7 @@ r_e = 6371 * 1e3 # m, earth radius
 # mass
 a_0 = -10**-6
 a_1 = 10**-5
-a_2 = 10**1
+a_2 = 10**2
 a_3 = 10**2
 a_4 = 10**0
 a_5 = 10**-2
@@ -122,7 +122,7 @@ def dDdt(m, D, coef):
 def f_CO2(CO2, T_o, e_coeffs):
     # introducing a "realistic minimum temperature of the earth" from the long term record
     T_min2 = 271 # K
-    CO2_change = e_coeffs[1] *(T_o - T_min2) #TODO: need shorter equi time scale; should use deep ocean temp, not ocean surf
+    CO2_change = e_coeffs[1] *(T_o - T_min2)
     return CO2_change
 
 # initial values 
@@ -215,7 +215,6 @@ for t in range(0, time+1, dt):
 
 ## PLOTS
 ##TODO: get time axes to show years ago
-##TODO: plot mass change components
 ##TODO: plot ice mass in GMLSE
 
 t_axis_f = np.arange(0,time+1,dt) #year, counting up from starting point
@@ -225,16 +224,27 @@ for j in range(len(t_axis_r)):
 
 
 # ice mass
-pl.plot(t_axis_f, np.log10(m_arr[0,:]), color='cyan', label = 'ice mass')
-pl.plot(t_axis_f, np.log10(np.abs( m_abl_arr[0,:])), color = 'blue', label = 'marine ablation')
-pl.plot(t_axis_f, np.log10(np.abs( s_abl_arr[0,:])), color = 'yellow', label = 'surface ablation')
-pl.plot(t_axis_f, np.log10(acc_arr[0,:]), color = 'orange', label = 'accumulation')
-
+pl.plot(t_axis_f, m_arr[0,:], color='cyan', label = 'ice mass')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [years]', fontsize=14)
 pl.ylabel('ice mass [Gt]', fontsize=14)
+pl.legend()
+#pl.title('')
+pl.grid(True)
+pl.show()
+
+# ice mass & components, log scale
+pl.plot(t_axis_f, np.log10(m_arr[0,:]), color='cyan', label = 'ice mass')
+pl.plot(t_axis_f, np.log10(np.abs( m_abl_arr[0,:])), color = 'blue', label = 'marine ablation')
+pl.plot(t_axis_f, np.log10(np.abs( s_abl_arr[0,:])), color = 'yellow', label = 'surface ablation')
+pl.plot(t_axis_f, np.log10(acc_arr[0,:]), color = 'orange', label = 'accumulation')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [years]', fontsize=14)
+pl.ylabel('log of ice mass', fontsize=14)
 pl.legend()
 #pl.title('')
 pl.grid(True)
