@@ -219,7 +219,6 @@ for t in range(0, time+1, dt):
 
 ## PLOTS
 ##TODO: get time axes to show years ago
-##TODO: plot ice mass in GMLSE
 
 t_axis_f = np.arange(0,time+1,dt) #year, counting up from starting point
 t_axis_r = np.zeros(len(t_axis_f)) #years ago
