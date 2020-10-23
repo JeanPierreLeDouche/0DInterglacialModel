@@ -178,7 +178,7 @@ for t in range(0, time+1, dt):
     if m_new < 0:
         m_new = 0
 
-    T_surface = T_surf(m, I, CO2, b_coeffs )  
+    T_surface = T_surf(m, I, CO2, b_coeffs )
     T_s_new = T_surface[0]
     
     if T_s_new > T_s_max:
@@ -226,11 +226,11 @@ for j in range(len(t_axis_r)):
 
 
 # ice mass
-pl.plot(t_axis_f, m_arr[0,:], color='cyan', label = 'ice mass')
+pl.plot(t_axis_f/1000, m_arr[0,:], color='cyan', label = 'ice mass')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
-pl.xlabel('time [years]', fontsize=14)
+pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel('ice mass [Gt]', fontsize=14)
 pl.legend()
 #pl.title('')
@@ -252,12 +252,12 @@ pl.grid(True)
 pl.show()
 
 # surface & upper ocean temp
-pl.plot(t_axis_f, T_s_arr[0,:], color='red', label = 'Surface temperature')
-pl.plot(t_axis_f, T_o_arr[0,:], color='blue', label = 'Ocean temperature')
+pl.plot(t_axis_f/1000, T_s_arr[0,:], color='red', label = 'Surface temperature')
+pl.plot(t_axis_f/1000, T_o_arr[0,:], color='blue', label = 'Ocean temperature')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
-pl.xlabel('time [years]', fontsize=14)
+pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel('temperature [K]', fontsize=14)
 #pl.title('')
 pl.grid(True)
@@ -265,33 +265,33 @@ pl.legend()
 pl.show()
 
 # insolation
-pl.plot(t_axis_f, I_arr[0,:], color='orange')
+pl.plot(t_axis_f/1000, I_arr[0,:], color='orange')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
-pl.xlabel('time [years]', fontsize=14)
+pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel(r'peak insolation [$W m^{-2}$]', fontsize=14)
 #pl.title('')
 pl.grid(True)
 pl.show()
 
 # CO_2 concentration
-pl.plot(t_axis_f, CO2_arr[0,:], color='black')
+pl.plot(t_axis_f/1000, CO2_arr[0,:], color='black')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
-pl.xlabel('time [years]', fontsize=14)
+pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel(r'$CO_2$ concentration [ppm]', fontsize=14)
 #pl.title('')
 pl.grid(True)
 pl.show()
 
 # isostatic depression
-pl.plot(t_axis_f, D_arr[0,:], color='grey')
+pl.plot(t_axis_f/1000, D_arr[0,:], color='grey')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
-pl.xlabel('time [years]', fontsize=14)
+pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel('surface depression [m]', fontsize=14)
 #pl.title('')
 pl.grid(True)
@@ -299,9 +299,9 @@ pl.show()
 
 
 # diagnostics
-pl.plot(t_axis_f, comp1[:], color='r', label = 'component1')
-pl.plot(t_axis_f, comp2[:], color='r', label = 'component2')
-pl.plot(t_axis_f, comp3[:], color='r', label = 'component3')
+pl.plot(t_axis_f/1000, comp1[:], color='r', label = 'component1')
+pl.plot(t_axis_f/1000, comp2[:], color='r', label = 'component2')
+pl.plot(t_axis_f/1000, comp3[:], color='r', label = 'component3')
 pl.grid(True)
 pl.show()
 
