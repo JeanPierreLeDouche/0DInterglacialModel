@@ -78,7 +78,7 @@ T_min = 228.15
 def dmdt(m, T_s, T_o, D, coef):
     
     # precipitation, three cases
-    if (T_s > T_min) and (T_s < 273.15):
+    if (T_s > T_min) and (T_s <= 273.15):
         P_sl = P_max*(T_s - T_min)/(273.15 - T_min)
     elif (T_s > 273.15) and (T_s < 298.15):
         P_sl = P_max - (P_max*(T_s - 273.15)/25)
@@ -133,7 +133,7 @@ def f_CO2(CO2, T_o, e_coeffs):
 # initial values 
 T_o = 278. # K 
 T_s = 280. # K 
-m = 10**7 # Pg ice
+m = 10**7 # Pg ice #TODO: find initial value based on paleoclimate data
 D = 1. # m 
 CO2 = 330.  # ppm
 D = 100 # m 
