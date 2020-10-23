@@ -103,7 +103,7 @@ def dmdt(m, T_s, T_o, D, coef):
     
 def Insol(t):
     # depends on t in years ? 
-    eps = eps_min + (eps_max)*np.sin((2*np.pi*t)/eps_period + phi0)
+    eps = eps_min + (eps_max - eps_min)*np.sin((2*np.pi*t)/eps_period + phi0)
     S = S0*(np.sin(lat*np.pi/180)*np.sin(eps) + np.cos(lat*np.pi/180)*np.cos(eps))
     return S
 
@@ -166,7 +166,7 @@ for t in range(0, time+1, dt):
     # first calculate new values for all model variables using the old values
     T_o_new = T_o + dTodt(T_s, T_o, c_0)*dt
     I_new = Insol(t)
-    D_new = D + dDdt(m, D, d_coeffs)*dt #TODO: adjust time scale      
+    D_new = D + dDdt(m, D, d_coeffs)*dt #TODO: adjust time scale?      
 
     CO2_new = f_CO2(CO2, T_o, e_coeffs )
     if CO2_new < CO2_min:
@@ -277,16 +277,16 @@ pl.grid(True)
 pl.legend()
 pl.show()
 
-# # insolation
-# pl.plot(t_axis_f/1000, I_arr[0,:], color='orange')
-# #pl.axis([,,,])  # define axes 
-# #pl.xticks(N.arange(,,), fontsize=12) 
-# #pl.yticks(N.arange(,,), fontsize=12) 
-# pl.xlabel('time [ka]', fontsize=14)
-# pl.ylabel(r'peak insolation [$W m^{-2}$]', fontsize=14)
-# #pl.title('')
-# pl.grid(True)
-# pl.show()
+# insolation
+pl.plot(t_axis_f/1000, I_arr[0,:], color='orange')
+#pl.axis([,,,])  # define axes 
+#pl.xticks(N.arange(,,), fontsize=12) 
+#pl.yticks(N.arange(,,), fontsize=12) 
+pl.xlabel('time [ka]', fontsize=14)
+pl.ylabel(r'peak insolation [$W m^{-2}$]', fontsize=14)
+#pl.title('')
+pl.grid(True)
+pl.show()
 
 # CO_2 concentration
 pl.plot(t_axis_f/1000, CO2_arr[0,:], color='black')
@@ -311,12 +311,12 @@ pl.grid(True)
 pl.show()
 
 
-# diagnostics
-# pl.plot(t_axis_f/1000, comp1[:], color='r', label = 'component1')
-# pl.plot(t_axis_f/1000, comp2[:], color='r', label = 'component2')
-# pl.plot(t_axis_f/1000, comp3[:], color='r', label = 'component3')
-# pl.grid(True)
-# pl.show()
+#diagnostics
+pl.plot(t_axis_f/1000, comp1[:], color='r', label = 'component1')
+pl.plot(t_axis_f/1000, comp2[:], color='r', label = 'component2')
+pl.plot(t_axis_f/1000, comp3[:], color='r', label = 'component3')
+pl.grid(True)
+pl.show()
 
 
 
