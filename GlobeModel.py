@@ -299,11 +299,11 @@ pl.show()
 
 
 # diagnostics
-pl.plot(t_axis_f/1000, comp1[:], color='r', label = 'component1')
-pl.plot(t_axis_f/1000, comp2[:], color='r', label = 'component2')
-pl.plot(t_axis_f/1000, comp3[:], color='r', label = 'component3')
-pl.grid(True)
-pl.show()
+# pl.plot(t_axis_f/1000, comp1[:], color='r', label = 'component1')
+# pl.plot(t_axis_f/1000, comp2[:], color='r', label = 'component2')
+# pl.plot(t_axis_f/1000, comp3[:], color='r', label = 'component3')
+# pl.grid(True)
+# pl.show()
 
 
 
