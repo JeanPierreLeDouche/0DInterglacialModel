@@ -164,7 +164,7 @@ for t in range(0, time+1, dt):
     # first calculate new values for all model variables using the old values
     T_o_new = T_o + dTodt(T_s, T_o, c_0)*dt
     I_new = Insol(t)
-    D_new = D + dDdt(m, D, d_0)*dt                
+    D_new = D + dDdt(m, D, d_0)*dt #TODO: adjust time scale        
 
     CO2_new = f_CO2(CO2, T_o, e_coeffs )
     if CO2_new < CO2_min:
