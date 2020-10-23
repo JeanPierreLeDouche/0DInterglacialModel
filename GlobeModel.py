@@ -59,9 +59,10 @@ d_0 = 10.0**(-12)
 # atmospheric CO2
 e_0 = 270. # ppm 
 e_1 = 1*10.0**(1)
-e_coeffs = np.array((e_0, e_1))
-CO2_min = 100.
+e_2 = 100.
+CO2_min = e_2
 CO2_max = 600.
+e_coeffs = np.array((e_0, e_1,e_2))
 
 #other
 P_max = 3*10**-3 #Pg per km^2 per yr
@@ -71,12 +72,10 @@ P_max = 3*10**-3 #Pg per km^2 per yr
 T_ref = 273. ### ???
 T_min = 233.
 
+# function that calculates dm/dt, input list of a coefficients as coef
 def dmdt(m, T_s, T_o, D, coef):
     
-    # shall we make precipitation into a parabola? 
-    
-    
-    # function that calculates dm/dt, input list of a coefficients as coef
+    # precipitation, three cases #TODO: play around with cutoff temperatures
     if (T_s > T_min) and (T_s < 273.15):
         P_sl = P_max*(T_s - T_min)/(273.15 - T_min)
     elif (T_s > 273.15) and (T_s < 275.15):
@@ -126,7 +125,7 @@ def dDdt(m, D, coef):
 def f_CO2(CO2, T_o, e_coeffs):
     # introducing a "realistic minimum temperature of the earth" from the long term record
     T_min2 = 271 # K
-    CO2_change = e_coeffs[1] *(T_o - T_min2) + CO2_min
+    CO2_change = e_coeffs[1] *(T_o - T_min2) + e_coeffs[2]
     return CO2_change
 
 # initial values 
@@ -238,16 +237,15 @@ pl.legend()
 pl.grid(True)
 pl.show()
 
-# ice mass & components, log scale
-pl.plot(t_axis_f/1000, m_arr[0,:]*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
-pl.plot(t_axis_f/1000, np.abs( m_abl_arr[0,:])*Gt_to_SLE_conv, color = 'blue', label = 'marine ablation')
-pl.plot(t_axis_f/1000, np.abs( s_abl_arr[0,:])*Gt_to_SLE_conv, color = 'yellow', label = 'surface ablation')
+# ice mass & components
+pl.plot(t_axis_f/1000, m_abl_arr[0,:]*Gt_to_SLE_conv, color = 'blue', label = 'marine ablation')
+pl.plot(t_axis_f/1000, s_abl_arr[0,:]*Gt_to_SLE_conv, color = 'yellow', label = 'surface ablation')
 pl.plot(t_axis_f/1000, acc_arr[0,:]*Gt_to_SLE_conv, color = 'orange', label = 'accumulation')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [ka]', fontsize=14)
-pl.ylabel('Ice mass (m SLE)', fontsize=14)
+pl.ylabel('Ice mass flux (m SLE per year)', fontsize=14)
 pl.legend()
 #pl.title('')
 pl.grid(True)
