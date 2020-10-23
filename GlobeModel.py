@@ -23,12 +23,12 @@ Gt_to_SLE_conv = 1 /( 361. * 1e3 ) # multiply value in Gt to get SLE in m
 # coefficients per modelling variable (initial values)
 # mass
 a_0 = -10**-7
-a_1 = 10**-7
-a_2 = 1.2*10**1
-a_3 = 1*10**4
-a_4 = 2*10**-4
-a_5 = 2*10**-6
-a_6 = 2*10**-5
+a_1 = 9*10**-6
+a_2 = 7*10**0
+a_3 = 5*10**4
+a_4 = 4*10**-4
+a_5 = 1*10**-6
+a_6 = 5*10**-7
 a_coeffs = np.array((a_0, a_1, a_2, a_3, a_4, a_5, a_6))
 
 # insolation
@@ -54,7 +54,9 @@ T_s_max = 300.
 c_0 = 5*10.0**(-4) #might need faster time scale for ocean surface
 
 # isostatic depression
-d_0 = 10.0**(-12)
+d_0 = 10.0**(-8)
+d_1 = 1.5*10.0**4
+d_coeffs = np.array((d_0,d_1))
 
 # atmospheric CO2
 e_0 = 270. # ppm 
@@ -69,24 +71,24 @@ P_max = 3*10**-3 #Pg per km^2 per yr
 
 # P_max = P_max * Gt_to_SLE_conv 
 
-T_ref = 273. ### ???
-T_min = 233.
+T_ref = 273.15
+T_min = 228.15
 
 # function that calculates dm/dt, input list of a coefficients as coef
 def dmdt(m, T_s, T_o, D, coef):
     
-    # precipitation, three cases #TODO: play around with cutoff temperatures
+    # precipitation, three cases
     if (T_s > T_min) and (T_s < 273.15):
         P_sl = P_max*(T_s - T_min)/(273.15 - T_min)
-    elif (T_s > 273.15) and (T_s < 275.15):
-        P_sl = P_max - (P_max*(T_s - 273.15)/2)
+    elif (T_s > 273.15) and (T_s < 298.15):
+        P_sl = P_max - (P_max*(T_s - 273.15)/25)
     else:
         P_sl = 0
     
     accum = ( 0.25 + coef[0] * m**(1/3)) * (P_sl + coef[1] * m **(1/3))*coef[2]*(coef[3] + m**(2/3))
 
     if T_s > T_ref:
-        surf_abl = -1 * (coef[4] * (T_s - T_ref)*m**(2/3) - coef[5]*m)
+        surf_abl = -1 * np.max([(coef[4] * (T_s - T_ref)*m**(2/3) - coef[5]*m),0])
     elif T_s <= T_ref:
         surf_abl=0
 
@@ -119,7 +121,7 @@ def dTodt(T_s, T_o, coef):
     return temp_change
 
 def dDdt(m, D, coef):
-    isost_change = coef* (m/3. - D)
+    isost_change = coef[0]* (m/3. - coef[1]*D)
     return isost_change 
 
 def f_CO2(CO2, T_o, e_coeffs):
@@ -134,7 +136,7 @@ T_s = 280. # K
 m = 10**7 # Pg ice
 D = 1. # m 
 CO2 = 330.  # ppm
-D = 1 # m 
+D = 100 # m 
 I = Insol(0)
 CO2 = 330  # ppm
 
@@ -164,7 +166,7 @@ for t in range(0, time+1, dt):
     # first calculate new values for all model variables using the old values
     T_o_new = T_o + dTodt(T_s, T_o, c_0)*dt
     I_new = Insol(t)
-    D_new = D + dDdt(m, D, d_0)*dt #TODO: adjust time scale        
+    D_new = D + dDdt(m, D, d_coeffs)*dt #TODO: adjust time scale      
 
     CO2_new = f_CO2(CO2, T_o, e_coeffs )
     if CO2_new < CO2_min:
@@ -226,12 +228,23 @@ for j in range(len(t_axis_r)):
 
 
 # ice mass
-pl.plot(t_axis_f/1000, m_arr[0,:], color='cyan', label = 'ice mass')
+# pl.plot(t_axis_f/1000, m_arr[0,:], color='cyan', label = 'ice mass')
+# #pl.axis([,,,])  # define axes 
+# #pl.xticks(N.arange(,,), fontsize=12) 
+# #pl.yticks(N.arange(,,), fontsize=12) 
+# pl.xlabel('time [ka]', fontsize=14)
+# pl.ylabel('ice mass [Gt]', fontsize=14)
+# pl.legend()
+# #pl.title('')
+# pl.grid(True)
+# pl.show()
+
+pl.plot(t_axis_f/1000, m_arr[0,:]*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [ka]', fontsize=14)
-pl.ylabel('ice mass [Gt]', fontsize=14)
+pl.ylabel('ice mass [m SLE]', fontsize=14)
 pl.legend()
 #pl.title('')
 pl.grid(True)
@@ -264,16 +277,16 @@ pl.grid(True)
 pl.legend()
 pl.show()
 
-# insolation
-pl.plot(t_axis_f/1000, I_arr[0,:], color='orange')
-#pl.axis([,,,])  # define axes 
-#pl.xticks(N.arange(,,), fontsize=12) 
-#pl.yticks(N.arange(,,), fontsize=12) 
-pl.xlabel('time [ka]', fontsize=14)
-pl.ylabel(r'peak insolation [$W m^{-2}$]', fontsize=14)
-#pl.title('')
-pl.grid(True)
-pl.show()
+# # insolation
+# pl.plot(t_axis_f/1000, I_arr[0,:], color='orange')
+# #pl.axis([,,,])  # define axes 
+# #pl.xticks(N.arange(,,), fontsize=12) 
+# #pl.yticks(N.arange(,,), fontsize=12) 
+# pl.xlabel('time [ka]', fontsize=14)
+# pl.ylabel(r'peak insolation [$W m^{-2}$]', fontsize=14)
+# #pl.title('')
+# pl.grid(True)
+# pl.show()
 
 # CO_2 concentration
 pl.plot(t_axis_f/1000, CO2_arr[0,:], color='black')
