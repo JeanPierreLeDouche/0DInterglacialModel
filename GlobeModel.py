@@ -7,10 +7,10 @@ Created on Thu Oct  8 11:47:29 2020
 # TODO:
 # find initial values from paleoclimate data
 
-
-
 import numpy as np
 import matplotlib.pyplot as pl
+import time as tim 
+
 
 # simulation parameters
 dt = 10 # yrs
@@ -161,6 +161,8 @@ comp1 = np.zeros(int(time/dt +1))
 comp2 = np.zeros(int(time/dt +1))
 comp3 = np.zeros(int(time/dt +1))
 
+t_s = tim.perf_counter()
+
 for t in range(0, time+1, dt): 
     
     # first calculate new values for all model variables using the old values
@@ -216,6 +218,9 @@ for t in range(0, time+1, dt):
     comp2[t//10] = T_surface[2]
     comp3[t//10] = T_surface[3]
     
+t_e = tim.perf_counter()
+
+print('calculating took: ', (t_e-t_s), ' seconds')
 
 
 ## PLOTS
