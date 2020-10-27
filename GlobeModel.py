@@ -134,7 +134,7 @@ def f_CO2(CO2, T_o, e_coeffs):
 T_o = 278. # K 
 T_s = 280. # K 
 m = 10**7 # Pg ice #TODO: find initial value based on paleoclimate data
-D = 1. # m 
+D = 100. # m 
 CO2 = 330.  # ppm
 D = 100 # m 
 I = Insol(0)
@@ -168,7 +168,7 @@ for t in range(0, time+1, dt):
     # first calculate new values for all model variables using the old values
     T_o_new = T_o + dTodt(T_s, T_o, c_0)*dt
     I_new = Insol(t)
-    D_new = D + dDdt(m, D, d_coeffs)*dt #TODO: adjust time scale?      
+    D_new = D + dDdt(m, D, d_coeffs)*dt
 
     CO2_new = f_CO2(CO2, T_o, e_coeffs )
     if CO2_new < CO2_min:
