@@ -21,7 +21,7 @@ import itertools
 dt = 10 # yrs
 time = int(200 * 1e3) # yrs
 
-n_runs = 5 
+n_runs = 100
 
 
 
@@ -100,12 +100,16 @@ def dmdt(m, T_s, T_o, D, coef):
         surf_abl = -1 * np.max([(coef[4] * (T_s - T_ref)*m**(2/3) - coef[5]*m),0])
     elif T_s <= T_ref:
         surf_abl=0
+    else: # rucksichtloss geimplementiert, warning (!!!)
+        surf_abl = 0
 
     if T_o > T_ref:
         mar_abl = -coef[6] * D * (T_o - T_ref)**2 * m**(2/3)
     elif T_o <= T_ref:
         mar_abl = coef[6] * D * (T_ref - T_o)**2 * m**(2/3)                                        
-                                                    
+    else: 
+        mar_abl = 0 #achtung: rucksichtloss geimplementiert (!!!)
+                                               
     mass_change = accum + surf_abl + mar_abl 
 
     return mass_change, accum, surf_abl, mar_abl 
@@ -151,15 +155,80 @@ def scorefunction(arrays):
     T_s_max = np.max(arrays[1, spinup:])
     T_s_min = np.min(arrays[1, spinup:])
     
-    m_max = np.max(arrays[2, spinup:])
-    m_min = np.min(arrays[2, spinup:])
+    m_max = np.max(arrays[2, spinup:]*Gt_to_SLE_conv)
+    m_min = np.min(arrays[2, spinup:]*Gt_to_SLE_conv)
     
     # write a bunch of if statements here 
+    points = 0
     
+    if CO2_max < 300 and CO2_min> 180:
+        points += 5
+        print('full score for CO2 !')
+    elif 300 < CO2_max < 350 and 150 < CO2_min < 180:
+        points += 2 
+    elif 350 < CO2_max < 400 and 120 < CO2_min < 150:
+        points += 1
+    else:
+        points += 0
+        
+    if T_s_max < 275 and T_s_min> 257:
+        points += 5
+        print('full score for Ts !')
+
+    elif 275 < T_s_max < 277 and 255 < T_s_min < 257:
+        points += 2 
+    elif 277 < T_s_max < 279 and 253 < T_s_min < 255:
+        points += 1
+    else:
+        points += 0
     
+    if m_max < 130 and m_min> -10:
+        points += 5
+        # print('full score for ice mass !')
+
+    elif 130 < m_max < 160 and -30 < m_min < -10:
+        points += 2 
+        print('suboptimal score for ice mass!')
+    elif 160 < m_max < 180 and -50 < m_min < -30:
+        points += 1
+        print('poor score for ice mass!')
+    else:
+        print('bad score for ice mass!')
+        points += 0
     
-    return 
+    score = round((points/15 *10), 1)
     
+    return score # between 0 and 10
+    
+def plot_func(time, CO2array, Tarray, marray, run_number):
+        pl.plot(time, marray*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
+        pl.title('Run: '+ str(run_number), fontsize = 20)
+        pl.xlabel('time [ka]', fontsize=14)
+        pl.ylabel('ice mass [m SLE]', fontsize=14)
+        pl.legend()
+        pl.grid(True)
+        pl.show()
+
+        # # surface & upper ocean temp
+        pl.plot(time,  Tarray, color='red', label = 'Surface temperature')
+        pl.title('Run: ' + str(run_number), fontsize = 20)
+        pl.xlabel('time [ka]', fontsize=14)
+        pl.ylabel('temperature [K]', fontsize=14)
+        pl.grid(True)
+        pl.legend()
+        pl.show()
+        
+        # CO_2 concentration
+        pl.plot(time, CO2array, color='black')
+        pl.title('Run: '+ str(run_number), fontsize = 20)
+        pl.xlabel('time [ka]', fontsize=14)
+        pl.ylabel(r'$CO_2$ concentration [ppm]', fontsize=14)
+        pl.grid(True)
+        pl.show()
+
+        
+        return
+
 
 ### main
 
@@ -192,34 +261,33 @@ def main_sim(coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, runtime, timestep
     comp2 = np.zeros(int(time/dt +1))
     comp3 = np.zeros(int(time/dt +1))
 
-    t_s = tim.perf_counter()
     
     for t in range(0, time+1, dt): 
         
         # first calculate new values for all model variables using the old values
-        T_o_new = T_o + dTodt(T_s, T_o, c_0)*dt
+        T_o_new = T_o + dTodt(T_s, T_o, coeffs_c)*dt
         I_new = Insol(t)
-        D_new = D + dDdt(m, D, d_coeffs)*dt #TODO: adjust time scale?      
+        D_new = D + dDdt(m, D, coeffs_d)*dt #TODO: adjust time scale?      
     
-        CO2_new = f_CO2(CO2, T_o, e_coeffs )
-        # if CO2_new < CO2_min:
-        #     CO2_new = CO2_min
-        # if CO2_new > CO2_max:
-        #     CO2_new = CO2_max 
+        CO2_new = f_CO2(CO2, T_o, coeffs_e )
+        if CO2_new < CO2_min:
+            CO2_new = CO2_min
+        if CO2_new > CO2_max:
+            CO2_new = CO2_max 
         
-        dm_dt = dmdt(m, T_s, T_o, D, a_coeffs)
+        dm_dt = dmdt(m, T_s, T_o, D, coeffs_a)
         
         m_new = m + dm_dt[0]*dt
-        # if m_new < 0:
-        #     m_new = 0
+        if m_new < 0:
+            m_new = 0
     
-        T_surface = T_surf(m, I, CO2, b_coeffs )
+        T_surface = T_surf(m, I, CO2, coeffs_b )
         T_s_new = T_surface[0]
         
-        # if T_s_new > T_s_max:
-        #     T_s_new = T_s_max
-        # if T_s_new <  T_s_min:
-        #     T_s_new = T_s_min                 
+        if T_s_new > T_s_max:
+            T_s_new = T_s_max
+        if T_s_new <  T_s_min:
+            T_s_new = T_s_min                 
     
     
         # then when everything is calculated replace the values by the new ones
@@ -249,9 +317,6 @@ def main_sim(coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, runtime, timestep
         # comp2[t//10] = T_surface[2]
         # comp3[t//10] = T_surface[3]
         
-    t_e = tim.perf_counter()
-    print('calculating simulation took: ', (t_e-t_s), ' seconds')
-    
     return  CO2_arr, T_s_arr, m_arr, coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e
 
 
@@ -260,15 +325,14 @@ def main_sim(coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, runtime, timestep
 
 # define interval where we want to look for parameters 
 
-a_limits = [[a_0 / 10, a_0 *10], [a_1/10, a_1*10], [a_2/10, a_2*10], [a_3/10, a_3*10], [a_4/10, a_4*10], [a_5/10, a_5*10], [a_6/10, a_6 *10]]
-b_limits = [[b_0 /10, b_0 * 10], [b_1/10, b_1*10], [b_2/10, b_2*10], [b_3/10, b_3*10]]
+# a_limits = [[a_0 / 10, a_0 *10], [a_1/10, a_1*10], [a_2/10, a_2*10], [a_3/10, a_3*10], [a_4/10, a_4*10], [a_5/10, a_5*10], [a_6/10, a_6 *10]]
+a_limits = [[a_0 * 0.9, a_0 *1.1], [a_1 *0.9, a_1*1.1], [a_2*0.9, a_2*1.1], [a_3*0.9, a_3*1.1], [a_4*0.9, a_4*1.1], [a_5*0.9, a_5*1.1], [a_6*0.9, a_6 *1.1]]
+b_limits = [[b_0 /100, b_0 * 100], [b_1/10, b_1*10], [b_2/10, b_2*10], [b_3/10, b_3*10]]
 c_limits = [[c_0/10, c_0*10]]
 d_limits = [[d_0/10, d_0*10],[d_1/10, d_1*10]]
 e_limits = [[e_0/10, e_0*10], [e_1/10, e_1*10], [e_2/10, e_2*10]]
 
 limits = []
-limits1 = []
-limits1 = limits1(itertools.chain(a_limits, b_limits, c_limits, d_limits, e_limits))
 
 limits.extend(a_limits)
 limits.extend(b_limits)
@@ -282,57 +346,33 @@ limits = np.asarray(limits)
 sampling = LHS(xlimits=limits)
 coefficients = sampling(n_runs)
 
+
+
 results =  [[] for x in range(n_runs)]
 
-for run in n_runs: 
-    run_simulation = main_sim(coefficients[:7], coefficients[7:11], coefficients[11], coefficients[12:14], coefficients[14:17], time, dt)
-    
-    m_max = np.max(run_simulation[2])
-    m_min = np.min(run_simulation[2])
-    
-    CO2_max = np.max(run_simulation[0])
-    CO2_min = 
-    
-    results[run] = run_simulation 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# postp
-#%%
-
+# produce time axis
 t_axis_f = np.arange(0,time+1,dt) #year, counting up from starting point
 t_axis_r = np.zeros(len(t_axis_f)) #years ago
 for j in range(len(t_axis_r)):
     t_axis_r[j] = t_axis_f[-(j+1)]
 
-pl.plot(t_axis_f/1000, testrun[2]*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
-#pl.axis([,,,])  # define axes 
-#pl.xticks(N.arange(,,), fontsize=12) 
-#pl.yticks(N.arange(,,), fontsize=12) 
-pl.xlabel('time [ka]', fontsize=14)
-pl.ylabel('ice mass [m SLE]', fontsize=14)
-pl.legend()
-#pl.title('')
-pl.grid(True)
-pl.show()
+for run in range(n_runs): 
+    
+    run_simulation = main_sim(coefficients[run][:7], coefficients[run][7:11], coefficients[run][11], coefficients[run][12:14], coefficients[run][14:17], time, dt)
+    # run_simulation = main_sim(a_coeffs, b_coeffs, c_0, d_coeffs, e_coeffs, time, dt)
+    
+    score = scorefunction(np.asarray(run_simulation[:3]))
+    
+    if score > 0:
+        results[run].append( run_simulation )
+        results[run].append(score)
+        print('score: ', score, 'for run number: ' + str(run))
+        plot_func(t_axis_f, results[run][0][0], results[run][0][1], results[run][0][2], run)
 
-
+    else:
+        results[run].append(np.NaN)
+        results[run].append(np.NaN)
+        
 
 
 
