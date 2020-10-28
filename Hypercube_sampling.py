@@ -319,18 +319,16 @@ def main_sim(coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, runtime, timestep
         
     return  CO2_arr, T_s_arr, m_arr, coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e
 
-
-
 #%%
 
 # define interval where we want to look for parameters 
 
 # a_limits = [[a_0 / 10, a_0 *10], [a_1/10, a_1*10], [a_2/10, a_2*10], [a_3/10, a_3*10], [a_4/10, a_4*10], [a_5/10, a_5*10], [a_6/10, a_6 *10]]
-a_limits = [[a_0 * 0.9, a_0 *1.1], [a_1 *0.9, a_1*1.1], [a_2*0.9, a_2*1.1], [a_3*0.9, a_3*1.1], [a_4*0.9, a_4*1.1], [a_5*0.9, a_5*1.1], [a_6*0.9, a_6 *1.1]]
-b_limits = [[b_0 /100, b_0 * 100], [b_1/10, b_1*10], [b_2/10, b_2*10], [b_3/10, b_3*10]]
-c_limits = [[c_0/10, c_0*10]]
-d_limits = [[d_0/10, d_0*10],[d_1/10, d_1*10]]
-e_limits = [[e_0/10, e_0*10], [e_1/10, e_1*10], [e_2/10, e_2*10]]
+a_limits = [[a_0 * 0.9, a_0 * 1.1], [a_1 * 0.9, a_1 * 1.1], [a_2 * 0.9, a_2 * 1.1], [a_3 * 0.9, a_3 * 1.1], [a_4 * 0.9, a_4 * 1.1], [a_5 * 0.9, a_5 * 1.1], [a_6 * 0.9, a_6 * 1.1]]
+b_limits = [[b_0 * 0.9, b_0 * 1.1], [b_1 * 0.9, b_1 * 1.1], [b_2 * 0.9, b_2 * 1.1], [b_3 * 0.9, b_3 * 1.1]]
+c_limits = [[c_0 * 0.9, c_0 * 1.1]]
+d_limits = [[d_0 * 0.9, d_0 * 1.1], [d_1 * 0.9, d_1 * 1.1]]
+e_limits = [[e_0 * 0.9, e_0 * 1.1], [e_1 * 0.9, e_1 * 1.1], [e_2 * 0.9, e_2 * 1.1]]
 
 limits = []
 
@@ -345,8 +343,6 @@ limits = np.asarray(limits)
 
 sampling = LHS(xlimits=limits)
 coefficients = sampling(n_runs)
-
-
 
 results =  [[] for x in range(n_runs)]
 
