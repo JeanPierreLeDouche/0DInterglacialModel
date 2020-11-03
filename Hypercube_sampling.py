@@ -16,14 +16,16 @@ import numpy as np
 import matplotlib.pyplot as pl
 import time as tim 
 import itertools 
+import pandas as pd
+import csv
+
 
 # simulation parameters
 dt = 10 # yrs
 time = int(200 * 1e3) # yrs
 
-n_runs = 100
-
-
+n_runs = 100 # amount of simulation runs out of which the top 5 is selected
+n_iterations = 100 # how many iterations of n_runs runs
 
 # constants
 r_e = 6371 * 1e3 # m, earth radius
@@ -85,6 +87,7 @@ T_min = 228.15
 
 # function that calculates dm/dt, input list of a coefficients as coef
 def dmdt(m, T_s, T_o, D, coef):
+    m_max = 1000 # MSLE 
     
     # precipitation, three cases
     if (T_s > T_min) and (T_s <= 273.15):
@@ -110,7 +113,10 @@ def dmdt(m, T_s, T_o, D, coef):
     else: 
         mar_abl = 0 #achtung: rucksichtloss geimplementiert (!!!)
                                                
-    mass_change = accum + surf_abl + mar_abl 
+    if m * Gt_to_SLE_conv > m_max:
+        mass_change= 0
+    else: 
+       mass_change = accum + surf_abl + mar_abl 
 
     return mass_change, accum, surf_abl, mar_abl 
     
@@ -143,7 +149,9 @@ def f_CO2(CO2, T_o, e_coeffs):
     CO2_change = e_coeffs[1] *(T_o - T_min2) + e_coeffs[2]
     return CO2_change
 
-def scorefunction(arrays): 
+
+
+def penaltyfunction(arrays, arrays2): 
     # assuming arrays is a tuple object with arrays for CO_2, T_s and  ice mass
     
     # exlude spinup time of 50 ka: 50*1e3 /10 = 5000 timesteps
@@ -158,47 +166,52 @@ def scorefunction(arrays):
     m_max = np.max(arrays[2, spinup:]*Gt_to_SLE_conv)
     m_min = np.min(arrays[2, spinup:]*Gt_to_SLE_conv)
     
-    # write a bunch of if statements here 
-    points = 0
+    # next for the later added arrays
+    mabl_max = np.max(arrays2[0, spinup:]*Gt_to_SLE_conv)
+    mabl_min = np.min(arrays2[0, spinup:]*Gt_to_SLE_conv)
     
-    if CO2_max < 300 and CO2_min> 180:
-        points += 5
-        print('full score for CO2 !')
-    elif 300 < CO2_max < 350 and 150 < CO2_min < 180:
-        points += 2 
-    elif 350 < CO2_max < 400 and 120 < CO2_min < 150:
-        points += 1
-    else:
-        points += 0
-        
-    if T_s_max < 275 and T_s_min> 257:
-        points += 5
-        print('full score for Ts !')
+    sabl_max = np.max(arrays2[1, spinup:]*Gt_to_SLE_conv)
+    sabl_min = np.min(arrays2[1, spinup:]*Gt_to_SLE_conv)
+    
+    acc_max = np.max(arrays2[2, spinup:]*Gt_to_SLE_conv)
+    acc_min = np.min(arrays2[2, spinup:]*Gt_to_SLE_conv)
+    
+    
+    penalty = 0
+    
+    #CO2
+    penalty += 0.01 * (CO2_max - 300)**2
+    penalty += 0.01 * (CO2_min - 180)**2
 
-    elif 275 < T_s_max < 277 and 255 < T_s_min < 257:
-        points += 2 
-    elif 277 < T_s_max < 279 and 253 < T_s_min < 255:
-        points += 1
-    else:
-        points += 0
-    
-    if m_max < 130 and m_min> -10:
-        points += 5
-        # print('full score for ice mass !')
+    # T_s
+    penalty += 0.01 * (T_s_max - 275)**2
+    penalty += 0.01 * (T_s_min - 257)**2
 
-    elif 130 < m_max < 160 and -30 < m_min < -10:
-        points += 2 
-        print('suboptimal score for ice mass!')
-    elif 160 < m_max < 180 and -50 < m_min < -30:
-        points += 1
-        print('poor score for ice mass!')
-    else:
-        print('bad score for ice mass!')
-        points += 0
+    # m
+    penalty += 0.01 * (m_max - 130)**2
+    penalty += 0.01 * (m_min - 10)**2
     
-    score = round((points/15 *10), 1)
+    #added these 3 later
+    # m abl 
+    penalty += 0.01 * (mabl_max + 1*0.025)**2
+    penalty += 0.01 * (mabl_min + 1*0.025)**2
     
-    return score # between 0 and 10
+    # s abl
+    penalty += 0.01 * (mabl_max + 1*0.025)**2
+    penalty += 0.01 * (mabl_min + 1*0.025)**2
+    
+    # acc
+    penalty += 0.01 * (mabl_max - 3*0.025)**2
+    penalty += 0.01 * (mabl_min - 3*0.025)**2
+    
+    # from a back of the envelope calculation: the mass balance must be about
+    # 9025 Gt/10yrs = 0.025 m SLE/10yrs to accumulate realistic amounts of mass. Here we assume
+    # a ratio of accumulation to ablation of 3:2 in total. This is a 
+    # guess. 
+    
+    result = round((penalty), 1)
+    
+    return result # between 0 and 10
     
 def plot_func(time, CO2array, Tarray, marray, run_number):
         pl.plot(time, marray*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
@@ -309,19 +322,19 @@ def main_sim(coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, runtime, timestep
         CO2_arr[t//10] = CO2
         m_arr[t//10] = m
         
-        # m_abl_arr[t//10] = dm_dt[3]
-        # s_abl_arr[t//10] = dm_dt[2]
-        # acc_arr[ t//10] = dm_dt[1]
+        m_abl_arr[t//10] = dm_dt[3]
+        s_abl_arr[t//10] = dm_dt[2]
+        acc_arr[ t//10] = dm_dt[1]
         
         # comp1[t//10] = T_surface[1]
         # comp2[t//10] = T_surface[2]
         # comp3[t//10] = T_surface[3]
         
-    return  CO2_arr, T_s_arr, m_arr, coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e
+    return  CO2_arr, T_s_arr, m_arr, coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, m_abl_arr, s_abl_arr, acc_arr
 
 #%%
 
-# define interval where we want to look for parameters 
+# define interval where we want to look for parameters, right now +- 10% 
 
 # a_limits = [[a_0 / 10, a_0 *10], [a_1/10, a_1*10], [a_2/10, a_2*10], [a_3/10, a_3*10], [a_4/10, a_4*10], [a_5/10, a_5*10], [a_6/10, a_6 *10]]
 a_limits = [[a_0 * 0.9, a_0 * 1.1], [a_1 * 0.9, a_1 * 1.1], [a_2 * 0.9, a_2 * 1.1], [a_3 * 0.9, a_3 * 1.1], [a_4 * 0.9, a_4 * 1.1], [a_5 * 0.9, a_5 * 1.1], [a_6 * 0.9, a_6 * 1.1]]
@@ -330,45 +343,168 @@ c_limits = [[c_0 * 0.9, c_0 * 1.1]]
 d_limits = [[d_0 * 0.9, d_0 * 1.1], [d_1 * 0.9, d_1 * 1.1]]
 e_limits = [[e_0 * 0.9, e_0 * 1.1], [e_1 * 0.9, e_1 * 1.1], [e_2 * 0.9, e_2 * 1.1]]
 
-limits = []
-
-limits.extend(a_limits)
-limits.extend(b_limits)
-limits.extend(c_limits)
-limits.extend(d_limits)
-limits.extend(e_limits)
-
-limits = np.asarray(limits)
-# use latin "hyper" cube sampling ( just a latin square for now)
-
-sampling = LHS(xlimits=limits)
-coefficients = sampling(n_runs)
-
-results =  [[] for x in range(n_runs)]
-
-# produce time axis
+    # produce time axis
 t_axis_f = np.arange(0,time+1,dt) #year, counting up from starting point
 t_axis_r = np.zeros(len(t_axis_f)) #years ago
 for j in range(len(t_axis_r)):
     t_axis_r[j] = t_axis_f[-(j+1)]
 
-for run in range(n_runs): 
+def make_limits_from_minmax(array):
+    array = np.asarray(array)
+    # rows = array.shape[0]
+    columns = array.shape[1]
     
-    run_simulation = main_sim(coefficients[run][:7], coefficients[run][7:11], coefficients[run][11], coefficients[run][12:14], coefficients[run][14:17], time, dt)
-    # run_simulation = main_sim(a_coeffs, b_coeffs, c_0, d_coeffs, e_coeffs, time, dt)
+    lims = [[] for x in range(columns)]
+    for col in range(columns):
+        lims[col].append(np.min(array[:,col]))
+        lims[col].append(np.max(array[:,col]))       
     
-    score = scorefunction(np.asarray(run_simulation[:3]))
-    
-    if score > 0:
-        results[run].append( run_simulation )
-        results[run].append(score)
-        print('score: ', score, 'for run number: ' + str(run))
-        plot_func(t_axis_f, results[run][0][0], results[run][0][1], results[run][0][2], run)
+    return lims
 
-    else:
-        results[run].append(np.NaN)
-        results[run].append(np.NaN)
+def parameter_search(a_lims, b_lims, c_lims, d_lims, e_lims, runN, time, dt):
+    limits = []
+    
+    limits.extend(a_lims)
+    limits.extend(b_lims)
+    limits.extend(c_lims)
+    limits.extend(d_lims)
+    limits.extend(e_lims)
+    
+    limits = np.asarray(limits)
+    # use latin hyper cube sampling
+    
+    sampling = LHS(xlimits=limits)
+    coefficients = sampling(runN)
+    
+    results =  [[] for x in range(runN)]
+    
+    run_and_score = np.zeros((2,runN))
+    for run in range(runN): 
         
+        run_simulation = main_sim(coefficients[run][:7], coefficients[run][7:11], coefficients[run][11], coefficients[run][12:14], coefficients[run][14:17], time, dt)
+        # run_simulation = main_sim(a_coeffs, b_coeffs, c_0, d_coeffs, e_coeffs, time, dt)
+        
+        penalty = penaltyfunction(np.asarray(run_simulation[:3]), np.asarray(run_simulation[8:12]))
+            
+        results[run].extend( run_simulation)
+        results[run].append(penalty)
+        print(f'penalty points: {penalty} for run number {run}')
+        # plot_func(t_axis_f, results[run][0], results[run][1], results[run][2], run)
+    
+        run_and_score[0,run] = int(run)
+        run_and_score[1,run]= penalty 
+        
+    if penalty == 0: 
+            print(f'*!!!* Run number {run} has completed without incurring any penalties*!!!*')
+                  
+    df_results = pd.DataFrame(np.transpose(run_and_score), columns=['run', 'score'])
+    df_results = df_results.sort_values('score')
+    
+    top_5_runs = df_results.iloc[:5,0]
+    top_5_data = []
+    topscore = df_results.iloc[0,1]
+    
+    best_a = np.zeros((5, len(a_coeffs)))
+    best_b = np.zeros((5, len(b_coeffs)))
+    best_c = np.zeros((5, 1))
+    best_d = np.zeros((5, len(d_coeffs)))
+    best_e = np.zeros((5, len(e_coeffs)))
+    
+    for i in enumerate(top_5_runs):    
+        top_5_data.append(results[int(i[1])]) # not sure if we need this data seperately
+        
+        best_a[i[0],:] = results[int(i[1])][3] 
+        best_b[i[0],:] = results[int(i[1])][4]
+        best_c[i[0],:] = results[int(i[1])][5]
+        best_d[i[0],:] = results[int(i[1])][6]
+        best_e[i[0],:] = results[int(i[1])][7]
+
+    new_a_range = make_limits_from_minmax(best_a)
+    new_b_range = make_limits_from_minmax(best_b)
+    new_c_range = make_limits_from_minmax(best_c)
+    new_d_range = make_limits_from_minmax(best_d)
+    new_e_range = make_limits_from_minmax(best_e)
+
+    return new_a_range, new_b_range, new_c_range, new_d_range, new_e_range, top_5_data, topscore
+
+# calculate starting point from best guess made by hand
+firstguess = parameter_search(a_limits, b_limits, c_limits, d_limits, e_limits, 1, time, dt)
+
+a = firstguess[0]
+b = firstguess[1]
+c = firstguess[2]
+d = firstguess[3]
+e = firstguess[4]
+
+# create file, set headers
+with open('parametersearchresults.csv', mode='w') as csvfile:
+    header_writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    header_writer.writerow(['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'b0', 'b1', 'b2', 'b3', 'c0', 'd0', 'd1', 'e0', 'e1', 'e2', 'score'])
+    
+for iterations in range(n_iterations):
+    print(f'ITERATION #: {iterations}')
+    simulation = parameter_search(a, b, c, d, e, n_runs, time, dt )
+    
+    
+    a = simulation[0]
+    b = simulation[1]
+    c = simulation[2]
+    d = simulation[3]
+    e = simulation[4]    
+    
+    output = []
+    output.append(simulation[:5])
+    with open('parametersearchresults.csv', mode='a') as csvfile:
+        limits_writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        output.append(simulation[6])
+        limits_writer.writerow(output)
+    print(f'This iterations topscore is: {simulation[6]}')
+
+
+
+
+### loop 2 
+#### iterate searching 
+#%%
+
+# n_2_runs = 1   
+# results2  =  [[] for x in range(n_runs)]
+
+# run_and_score2 = np.zeros((2,n_runs))
+# for run in range(n_2_runs): 
+#     run_simulation2 = main_sim(new_a, new_b, new_c, new_d, new_e, time, dt)
+#     penalty2 = penaltyfunction(np.asarray(run_simulation2[:3]))
+
+#     results2[run].extend( run_simulation2)
+#     results2[run].append(penalty2)
+    
+#     print(f'penalty points: {penalty2} for run number {run}')
+#     plot_func(t_axis_f, results2[run][0], results2[run][1], results2[run][2], run)
+
+
+#     run_and_score2[0,run] = int(run)
+#     run_and_score2[1,run]= penalty2     
+
+# #%%
+    
+# m_abl = run_simulation2[8]
+# s_abl = run_simulation2[9]
+# acc =  run_simulation2[10]
+
+
+# #%%
+# m_arr= run_simulation2[2]
+    
+# # pl.plot(t_axis_f, m_arr*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
+# pl.plot(t_axis_f,m_abl*Gt_to_SLE_conv, color='red', label = 'm abl ')
+# pl.plot(t_axis_f, s_abl*Gt_to_SLE_conv, color='yellow', label = 's abl')
+# pl.plot(t_axis_f,acc*Gt_to_SLE_conv, color='green', label = 'acc')
+# pl.title('averaged run', fontsize = 20)
+# pl.xlabel('time [ka]', fontsize=14)
+# pl.ylabel('ice mass [m SLE]', fontsize=14)
+# pl.legend()
+# pl.grid(True)
+# pl.show()
 
 
 
