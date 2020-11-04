@@ -22,10 +22,10 @@ import csv
 
 # simulation parameters
 dt = 10 # yrs
-time = int(200 * 1e3) # yrs
+time = int(400 * 1e3) # yrs
 
-n_runs = 100 # amount of simulation runs out of which the top 5 is selected
-n_iterations = 100 # how many iterations of n_runs runs
+n_runs = 500 # amount of simulation runs out of which the top 5 is selected
+n_iterations = 1000 # how many iterations of n_runs runs
 
 # constants
 r_e = 6371 * 1e3 # m, earth radius
@@ -73,8 +73,10 @@ d_coeffs = np.array((d_0,d_1))
 e_0 = 270. # ppm 
 e_1 = 1*10.0**(1)
 e_2 = 100.
-CO2_min = e_2
-CO2_max = 600.
+CO2_min = 5
+# CO2_min = e_2 
+CO2_max = 1600.
+# CO2_max = 600. 
 e_coeffs = np.array((e_0, e_1,e_2))
 
 #other
@@ -87,7 +89,7 @@ T_min = 228.15
 
 # function that calculates dm/dt, input list of a coefficients as coef
 def dmdt(m, T_s, T_o, D, coef):
-    m_max = 1000 # MSLE 
+    m_max = 100000 # MSLE # this value is here just to keep the model from running into overflows and crashing the loop 
     
     # precipitation, three cases
     if (T_s > T_min) and (T_s <= 273.15):
@@ -213,9 +215,9 @@ def penaltyfunction(arrays, arrays2):
     
     return result # between 0 and 10
     
-def plot_func(time, CO2array, Tarray, marray, run_number):
+def plot_func(time, CO2array, Tarray, marray, run_number, score):
         pl.plot(time, marray*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
-        pl.title('Run: '+ str(run_number), fontsize = 20)
+        pl.title('Run: '+ str(run_number)+ ', score ' +str(score), fontsize = 20)
         pl.xlabel('time [ka]', fontsize=14)
         pl.ylabel('ice mass [m SLE]', fontsize=14)
         pl.legend()
@@ -224,7 +226,7 @@ def plot_func(time, CO2array, Tarray, marray, run_number):
 
         # # surface & upper ocean temp
         pl.plot(time,  Tarray, color='red', label = 'Surface temperature')
-        pl.title('Run: ' + str(run_number), fontsize = 20)
+        pl.title('Run: ' + str(run_number)+ ', score ' +str(score), fontsize = 20)
         pl.xlabel('time [ka]', fontsize=14)
         pl.ylabel('temperature [K]', fontsize=14)
         pl.grid(True)
@@ -233,7 +235,7 @@ def plot_func(time, CO2array, Tarray, marray, run_number):
         
         # CO_2 concentration
         pl.plot(time, CO2array, color='black')
-        pl.title('Run: '+ str(run_number), fontsize = 20)
+        pl.title('Run: '+ str(run_number)+ ', score ' +str(score), fontsize = 20)
         pl.xlabel('time [ka]', fontsize=14)
         pl.ylabel(r'$CO_2$ concentration [ppm]', fontsize=14)
         pl.grid(True)
@@ -241,6 +243,30 @@ def plot_func(time, CO2array, Tarray, marray, run_number):
 
         
         return
+
+def plot_func_mass_components(time, m, mabl, sabl, acc, run_number, score):
+        
+        pl.plot(time, m*Gt_to_SLE_conv, color='green', label = 'ice mass')
+
+        # # marine ablation 
+        pl.plot(time/1000,  mabl * Gt_to_SLE_conv, color='orange', label = 'marine ablation')
+        # surface ablation
+        pl.plot(time/1000, sabl * Gt_to_SLE_conv , color='red', label = 'surface ablation')
+        # accumulation
+        pl.plot(time/1000, acc * Gt_to_SLE_conv, color='blue', label = 'accumulation')
+
+        pl.legend()
+
+        pl.title('Run: '+ str(run_number)+ ', score' +str(score), fontsize = 20)
+        pl.xlabel('time [ka]', fontsize=14)
+        pl.ylabel('ice mass change', fontsize=14)
+        pl.grid(True)
+       
+        pl.show()
+        
+        return
+
+
 
 
 ### main
@@ -337,11 +363,18 @@ def main_sim(coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, runtime, timestep
 # define interval where we want to look for parameters, right now +- 10% 
 
 # a_limits = [[a_0 / 10, a_0 *10], [a_1/10, a_1*10], [a_2/10, a_2*10], [a_3/10, a_3*10], [a_4/10, a_4*10], [a_5/10, a_5*10], [a_6/10, a_6 *10]]
-a_limits = [[a_0 * 0.9, a_0 * 1.1], [a_1 * 0.9, a_1 * 1.1], [a_2 * 0.9, a_2 * 1.1], [a_3 * 0.9, a_3 * 1.1], [a_4 * 0.9, a_4 * 1.1], [a_5 * 0.9, a_5 * 1.1], [a_6 * 0.9, a_6 * 1.1]]
-b_limits = [[b_0 * 0.9, b_0 * 1.1], [b_1 * 0.9, b_1 * 1.1], [b_2 * 0.9, b_2 * 1.1], [b_3 * 0.9, b_3 * 1.1]]
-c_limits = [[c_0 * 0.9, c_0 * 1.1]]
-d_limits = [[d_0 * 0.9, d_0 * 1.1], [d_1 * 0.9, d_1 * 1.1]]
-e_limits = [[e_0 * 0.9, e_0 * 1.1], [e_1 * 0.9, e_1 * 1.1], [e_2 * 0.9, e_2 * 1.1]]
+a_limits = [[a_0 * 0.7, a_0 * 1.3], [a_1 * 0.7, a_1 * 1.3], [a_2 * 0.7, a_2 * 1.3], [a_3 * 0.7, a_3 * 1.3], [a_4 * 0.7, a_4 * 1.3], [a_5 * 0.7, a_5 * 1.3], [a_6 * 0.7, a_6 * 1.3]]
+b_limits = [[b_0 * 0.7, b_0 * 1.3], [b_1 * 0.7, b_1 * 1.3], [b_2 * 0.7, b_2 * 1.3], [b_3 * 0.7, b_3 * 1.3]]
+c_limits = [[c_0 * 0.7, c_0 * 1.3]]
+d_limits = [[d_0 * 0.7, d_0 * 1.3], [d_1 * 0.7, d_1 * 1.3]]
+e_limits = [[e_0 * 0.7, e_0 * 1.3], [e_1 * 0.7, e_1 * 1.3], [e_2 * 0.7, e_2 * 1.3]]
+
+# a_limits = [[a_0 * 0.7, a_0 * 1.1], [a_1 * 0.9, a_1 * 1.1], [a_2 * 0.9, a_2 * 1.1], [a_3 * 0.9, a_3 * 1.1], [a_4 * 0.9, a_4 * 1.1], [a_5 * 0.9, a_5 * 1.1], [a_6 * 0.9, a_6 * 1.1]]
+# b_limits = [[b_0 * 0.7, b_0 * 1.1], [b_1 * 0.9, b_1 * 1.1], [b_2 * 0.9, b_2 * 1.1], [b_3 * 0.9, b_3 * 1.1]]
+# c_limits = [[c_0 * 0.7, c_0 * 1.1]]
+# d_limits = [[d_0 * 0.7, d_0 * 1.1], [d_1 * 0.9, d_1 * 1.1]]
+# e_limits = [[e_0 * 0.7, e_0 * 1.1], [e_1 * 0.9, e_1 * 1.1], [e_2 * 0.9, e_2 * 1.1]]
+
 
     # produce time axis
 t_axis_f = np.arange(0,time+1,dt) #year, counting up from starting point
@@ -371,7 +404,24 @@ def parameter_search(a_lims, b_lims, c_lims, d_lims, e_lims, runN, time, dt):
     limits.extend(e_lims)
     
     limits = np.asarray(limits)
-    # use latin hyper cube sampling
+    
+    ## force minimum 1% search range
+    for i in range(len(limits)):
+        low_bound = limits[i][0]
+        high_bound = limits[i][1]
+        
+        diff = np.abs(high_bound - low_bound)
+                
+        if diff < 0.01 * low_bound or diff < 0.01*high_bound:
+            new_low = 0.999 * low_bound
+            new_high = 1.001 * high_bound
+            
+            limits[i][0] = new_low
+            limits[i][1] = new_high
+            
+        else: 
+            pass
+###    use latin hyper cube sampling
     
     sampling = LHS(xlimits=limits)
     coefficients = sampling(runN)
@@ -388,7 +438,8 @@ def parameter_search(a_lims, b_lims, c_lims, d_lims, e_lims, runN, time, dt):
             
         results[run].extend( run_simulation)
         results[run].append(penalty)
-        print(f'penalty points: {penalty} for run number {run}')
+        if run % 25 == 0:
+            print(f'penalty points: {penalty} for run number {run}')
         # plot_func(t_axis_f, results[run][0], results[run][1], results[run][2], run)
     
         run_and_score[0,run] = int(run)
@@ -460,12 +511,28 @@ for iterations in range(n_iterations):
         limits_writer.writerow(output)
     print(f'This iterations topscore is: {simulation[6]}')
 
+#%%
 
 
+convergence = [[-5.637125406417947e-08, -5.637125406417806e-08], [2.6146352643870847e-06, 2.6534597815475723e-06], [4.091403021578632, 4.107234851145783], [23281.077621480457, 23538.165339074018], [0.00023361217739777088, 0.00023588962327721817], [4.238254745481942e-07, 4.334992364980588e-07], [4.5969816956643706e-09, 4.6307781280641006e-09]], [[73.71855227390651, 74.88788966855998], [0.012322372739089548, 0.012511687288655215], [7.169011277369568e-10, 7.301726926885886e-10], [3.827286480049632, 3.887525427552866]], [[0.00023374711573946093, 0.00023587844031869122]], [[1.2279466840715978e-09, 1.2512030929574657e-09], [7646.16689103245, 7830.250545177716]], [[127.84343926282045, 130.82266019074572], [4.302895411941794, 4.377258531363198], [70.2961933640107, 71.3043532869009]]
+conv_score = 99783459.7
+
+# conv_score = 479.4
+
+aa = np.mean(np.asarray(convergence[0]), axis=1)
+bb = np.mean(np.asarray(convergence[1]), axis=1)
+cc = np.mean(np.asarray(convergence[2]), axis=1)
+dd = np.mean(np.asarray(convergence[3]), axis=1)
+ee = np.mean(np.asarray(convergence[4]), axis=1)
+              
+run_conv = main_sim(aa, bb, cc, dd, ee, time, dt)
+
+plot_func(t_axis_f, run_conv[0], run_conv[1], run_conv[2], 0, conv_score )
+# plot_func_mass_components(t_axis_f, run_conv[2], run_conv[8], run_conv[9], run_conv[10], 0)
 
 ### loop 2 
 #### iterate searching 
-#%%
+
 
 # n_2_runs = 1   
 # results2  =  [[] for x in range(n_runs)]
@@ -491,20 +558,22 @@ for iterations in range(n_iterations):
 # s_abl = run_simulation2[9]
 # acc =  run_simulation2[10]
 
+m_arr= run_conv[2]
+m_abl = run_conv[8]
+s_abl = run_conv[9]
+acc = run_conv[10]
 
-# #%%
-# m_arr= run_simulation2[2]
     
-# # pl.plot(t_axis_f, m_arr*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
-# pl.plot(t_axis_f,m_abl*Gt_to_SLE_conv, color='red', label = 'm abl ')
-# pl.plot(t_axis_f, s_abl*Gt_to_SLE_conv, color='yellow', label = 's abl')
-# pl.plot(t_axis_f,acc*Gt_to_SLE_conv, color='green', label = 'acc')
-# pl.title('averaged run', fontsize = 20)
-# pl.xlabel('time [ka]', fontsize=14)
-# pl.ylabel('ice mass [m SLE]', fontsize=14)
-# pl.legend()
-# pl.grid(True)
-# pl.show()
+# pl.plot(t_axis_f, m_arr*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
+pl.plot(t_axis_f/1000,m_abl*Gt_to_SLE_conv, color='red', label = 'm abl ')
+pl.plot(t_axis_f/1000, s_abl*Gt_to_SLE_conv, color='yellow', label = 's abl')
+pl.plot(t_axis_f/1000,acc*Gt_to_SLE_conv, color='green', label = 'acc')
+pl.title('? run, score: '+str(conv_score), fontsize = 20)
+pl.xlabel('time [ka]', fontsize=14)
+pl.ylabel('ice mass change [m SLE / 10 yr]', fontsize=14)
+pl.legend()
+pl.grid(True)
+pl.show()
 
 
 
