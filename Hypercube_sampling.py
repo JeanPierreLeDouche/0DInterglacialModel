@@ -22,9 +22,9 @@ import csv
 
 # simulation parameters
 dt = 10 # yrs
-time = int(400 * 1e3) # yrs
+time = int(1000 * 1e3) # yrs
 
-n_runs = 500 # amount of simulation runs out of which the top 5 is selected
+n_runs = 2500 # amount of simulation runs out of which the top 5 is selected
 n_iterations = 1000 # how many iterations of n_runs runs
 
 # constants
@@ -151,8 +151,6 @@ def f_CO2(CO2, T_o, e_coeffs):
     CO2_change = e_coeffs[1] *(T_o - T_min2) + e_coeffs[2]
     return CO2_change
 
-
-
 def penaltyfunction(arrays, arrays2): 
     # assuming arrays is a tuple object with arrays for CO_2, T_s and  ice mass
     
@@ -266,9 +264,6 @@ def plot_func_mass_components(time, m, mabl, sabl, acc, run_number, score):
         
         return
 
-
-
-
 ### main
 
 def main_sim(coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, runtime, timestep):
@@ -362,18 +357,19 @@ def main_sim(coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, runtime, timestep
 
 # define interval where we want to look for parameters, right now +- 10% 
 
-# a_limits = [[a_0 / 10, a_0 *10], [a_1/10, a_1*10], [a_2/10, a_2*10], [a_3/10, a_3*10], [a_4/10, a_4*10], [a_5/10, a_5*10], [a_6/10, a_6 *10]]
-a_limits = [[a_0 * 0.7, a_0 * 1.3], [a_1 * 0.7, a_1 * 1.3], [a_2 * 0.7, a_2 * 1.3], [a_3 * 0.7, a_3 * 1.3], [a_4 * 0.7, a_4 * 1.3], [a_5 * 0.7, a_5 * 1.3], [a_6 * 0.7, a_6 * 1.3]]
-b_limits = [[b_0 * 0.7, b_0 * 1.3], [b_1 * 0.7, b_1 * 1.3], [b_2 * 0.7, b_2 * 1.3], [b_3 * 0.7, b_3 * 1.3]]
-c_limits = [[c_0 * 0.7, c_0 * 1.3]]
-d_limits = [[d_0 * 0.7, d_0 * 1.3], [d_1 * 0.7, d_1 * 1.3]]
-e_limits = [[e_0 * 0.7, e_0 * 1.3], [e_1 * 0.7, e_1 * 1.3], [e_2 * 0.7, e_2 * 1.3]]
+### a_limits = [[a_0 / 10, a_0 *10], [a_1/10, a_1*10], [a_2/10, a_2*10], [a_3/10, a_3*10], [a_4/10, a_4*10], [a_5/10, a_5*10], [a_6/10, a_6 *10]]
+# a_limits = [[a_0 * 0.7, a_0 * 1.3], [a_1 * 0.7, a_1 * 1.3], [a_2 * 0.7, a_2 * 1.3], [a_3 * 0.7, a_3 * 1.3], [a_4 * 0.7, a_4 * 1.3], [a_5 * 0.7, a_5 * 1.3], [a_6 * 0.7, a_6 * 1.3]]
+# b_limits = [[b_0 * 0.7, b_0 * 1.3], [b_1 * 0.7, b_1 * 1.3], [b_2 * 0.7, b_2 * 1.3], [b_3 * 0.7, b_3 * 1.3]]
+# c_limits = [[c_0 * 0.7, c_0 * 1.3]]
+# d_limits = [[d_0 * 0.7, d_0 * 1.3], [d_1 * 0.7, d_1 * 1.3]]
+# e_limits = [[e_0 * 0.7, e_0 * 1.3], [e_1 * 0.7, e_1 * 1.3], [e_2 * 0.7, e_2 * 1.3]]
 
-# a_limits = [[a_0 * 0.7, a_0 * 1.1], [a_1 * 0.9, a_1 * 1.1], [a_2 * 0.9, a_2 * 1.1], [a_3 * 0.9, a_3 * 1.1], [a_4 * 0.9, a_4 * 1.1], [a_5 * 0.9, a_5 * 1.1], [a_6 * 0.9, a_6 * 1.1]]
-# b_limits = [[b_0 * 0.7, b_0 * 1.1], [b_1 * 0.9, b_1 * 1.1], [b_2 * 0.9, b_2 * 1.1], [b_3 * 0.9, b_3 * 1.1]]
-# c_limits = [[c_0 * 0.7, c_0 * 1.1]]
-# d_limits = [[d_0 * 0.7, d_0 * 1.1], [d_1 * 0.9, d_1 * 1.1]]
-# e_limits = [[e_0 * 0.7, e_0 * 1.1], [e_1 * 0.9, e_1 * 1.1], [e_2 * 0.9, e_2 * 1.1]]
+# +- 10 % 
+a_limits = [[a_0 * 0.9, a_0 * 1.1], [a_1 * 0.9, a_1 * 1.1], [a_2 * 0.9, a_2 * 1.1], [a_3 * 0.9, a_3 * 1.1], [a_4 * 0.9, a_4 * 1.1], [a_5 * 0.9, a_5 * 1.1], [a_6 * 0.9, a_6 * 1.1]]
+b_limits = [[b_0 * 0.9, b_0 * 1.1], [b_1 * 0.9, b_1 * 1.1], [b_2 * 0.9, b_2 * 1.1], [b_3 * 0.9, b_3 * 1.1]]
+c_limits = [[c_0 * 0.9, c_0 * 1.1]]
+d_limits = [[d_0 * 0.9, d_0 * 1.1], [d_1 * 0.9, d_1 * 1.1]]
+e_limits = [[e_0 * 0.9, e_0 * 1.1], [e_1 * 0.9, e_1 * 1.1], [e_2 * 0.9, e_2 * 1.1]]
 
 
     # produce time axis
@@ -440,6 +436,7 @@ def parameter_search(a_lims, b_lims, c_lims, d_lims, e_lims, runN, time, dt):
         results[run].append(penalty)
         if run % 25 == 0:
             print(f'penalty points: {penalty} for run number {run}')
+        # print(f'penalty points: {penalty} for run number {run}')
         # plot_func(t_axis_f, results[run][0], results[run][1], results[run][2], run)
     
         run_and_score[0,run] = int(run)
@@ -488,14 +485,14 @@ d = firstguess[3]
 e = firstguess[4]
 
 # create file, set headers
-with open('parametersearchresults.csv', mode='w') as csvfile:
+with open('parametersearchresults2500_1000ka2.csv', mode='w') as csvfile:
     header_writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    header_writer.writerow(f'nrun is {n_runs}, iterations: {n_iterations}')
     header_writer.writerow(['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'b0', 'b1', 'b2', 'b3', 'c0', 'd0', 'd1', 'e0', 'e1', 'e2', 'score'])
     
 for iterations in range(n_iterations):
     print(f'ITERATION #: {iterations}')
     simulation = parameter_search(a, b, c, d, e, n_runs, time, dt )
-    
     
     a = simulation[0]
     b = simulation[1]
@@ -505,7 +502,7 @@ for iterations in range(n_iterations):
     
     output = []
     output.append(simulation[:5])
-    with open('parametersearchresults.csv', mode='a') as csvfile:
+    with open('parametersearchresults2500_1000ka2.csv', mode='a') as csvfile:
         limits_writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         output.append(simulation[6])
         limits_writer.writerow(output)
@@ -514,10 +511,9 @@ for iterations in range(n_iterations):
 #%%
 
 
-convergence = [[-5.637125406417947e-08, -5.637125406417806e-08], [2.6146352643870847e-06, 2.6534597815475723e-06], [4.091403021578632, 4.107234851145783], [23281.077621480457, 23538.165339074018], [0.00023361217739777088, 0.00023588962327721817], [4.238254745481942e-07, 4.334992364980588e-07], [4.5969816956643706e-09, 4.6307781280641006e-09]], [[73.71855227390651, 74.88788966855998], [0.012322372739089548, 0.012511687288655215], [7.169011277369568e-10, 7.301726926885886e-10], [3.827286480049632, 3.887525427552866]], [[0.00023374711573946093, 0.00023587844031869122]], [[1.2279466840715978e-09, 1.2512030929574657e-09], [7646.16689103245, 7830.250545177716]], [[127.84343926282045, 130.82266019074572], [4.302895411941794, 4.377258531363198], [70.2961933640107, 71.3043532869009]]
-conv_score = 99783459.7
+convergence =[[-5.195642692826793e-08, -5.0591248467859786e-08], [6.975611737995667e-06, 6.988602729324854e-06], [3.268700120170882, 3.271495626848382], [34730.27770011655, 34945.454950208055], [0.00020349036753745237, 0.00020603577622953424], [3.607396443930929e-07, 3.8280524307642596e-07], [7.160152933980525e-08, 7.167329255126716e-08]], [[89.44808101316544, 89.6534142840577], [0.010387217564774783, 0.010669446552885046], [4.104564417647632e-10, 4.129099836252062e-10], [5.137865736133415, 5.203229220622828]], [[1.589468846108354e-07, 1.5941961158648341e-07]], [[2.5473936146013737e-09, 2.5790274803604174e-09], [7879.951286582043, 7915.4188516570675]], [[97.5698243255616, 100.67667004171584], [8.996539735677258, 8.999473377760545], [90.77755592526381, 90.81367328584854]]
+conv_score = 358.7
 
-# conv_score = 479.4
 
 aa = np.mean(np.asarray(convergence[0]), axis=1)
 bb = np.mean(np.asarray(convergence[1]), axis=1)
@@ -562,7 +558,6 @@ m_arr= run_conv[2]
 m_abl = run_conv[8]
 s_abl = run_conv[9]
 acc = run_conv[10]
-
     
 # pl.plot(t_axis_f, m_arr*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
 pl.plot(t_axis_f/1000,m_abl*Gt_to_SLE_conv, color='red', label = 'm abl ')

@@ -28,12 +28,12 @@ for i in range(50):
     L_y_mc.append(y_mc)
 #%%
 
-plt.title('LHS sampling vs MC sampling example', fontsize = 25)
+# plt.title('LHS sampling vs MC sampling example', fontsize = 25)
 plt.plot(x[:, 0], x[:, 1], "o", color = 'b', label = 'LHS')
 plt.plot(L_x_mc, L_y_mc, "x", color = 'r', label = 'MC')
 plt.xlabel("x", fontsize = 20)
 plt.xticks(fontsize=15)
 plt.ylabel("y", fontsize = 20)
 plt.yticks(fontsize = 15)
-plt.legend()
+plt.legend(fontsize = 15)
 plt.show()
