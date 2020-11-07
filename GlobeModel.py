@@ -14,7 +14,7 @@ import time as tim
 
 # simulation parameters
 dt = 10 # yrs
-time = int(200 * 1e3) # yrs
+time = int(1000 * 1e3) # yrs
 
 # constants
 r_e = 6371 * 1e3 # m, earth radius
@@ -244,28 +244,29 @@ for j in range(len(t_axis_r)):
 # pl.grid(True)
 # pl.show()
 
+#ice mass
 pl.plot(t_axis_f/1000, m_arr[0,:]*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
 #pl.axis([,,,])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel('ice mass [m SLE]', fontsize=14)
-pl.legend()
-#pl.title('')
+# pl.legend()
+pl.title('with hand-tuned values, penalty score: 172', fontsize=14)
 pl.grid(True)
 pl.show()
 
-# ice mass & components
+# ice mass change components
 pl.plot(t_axis_f/1000, m_abl_arr[0,:]*Gt_to_SLE_conv, color = 'blue', label = 'marine ablation')
 pl.plot(t_axis_f/1000, s_abl_arr[0,:]*Gt_to_SLE_conv, color = 'yellow', label = 'surface ablation')
 pl.plot(t_axis_f/1000, acc_arr[0,:]*Gt_to_SLE_conv, color = 'orange', label = 'accumulation')
-#pl.axis([,,,])  # define axes 
+# pl.axis([-50,1050,-0.003,0.005])  # define axes 
 #pl.xticks(N.arange(,,), fontsize=12) 
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel('Ice mass flux (m SLE per year)', fontsize=14)
-pl.legend()
-#pl.title('')
+pl.legend(loc='center left')
+pl.title('with hand-tuned values, penalty score: 172', fontsize=14)
 pl.grid(True)
 pl.show()
 
@@ -277,7 +278,7 @@ pl.plot(t_axis_f/1000, T_o_arr[0,:], color='blue', label = 'Ocean temperature')
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel('temperature [K]', fontsize=14)
-#pl.title('')
+pl.title('with hand-tuned values, penalty score: 172', fontsize=14)
 pl.grid(True)
 pl.legend()
 pl.show()
@@ -289,7 +290,7 @@ pl.plot(t_axis_f/1000, I_arr[0,:], color='orange')
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel(r'peak insolation [$W m^{-2}$]', fontsize=14)
-#pl.title('')
+pl.title('with hand-tuned values, penalty score: 172', fontsize=14)
 pl.grid(True)
 pl.show()
 
@@ -300,7 +301,7 @@ pl.plot(t_axis_f/1000, CO2_arr[0,:], color='black')
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel(r'$CO_2$ concentration [ppm]', fontsize=14)
-#pl.title('')
+pl.title('with hand-tuned values, penalty score: 172', fontsize=14)
 pl.grid(True)
 pl.show()
 
@@ -311,17 +312,17 @@ pl.plot(t_axis_f/1000, D_arr[0,:], color='grey')
 #pl.yticks(N.arange(,,), fontsize=12) 
 pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel('surface depression [m]', fontsize=14)
-#pl.title('')
+pl.title('with hand-tuned values, penalty score: 172', fontsize=14)
 pl.grid(True)
 pl.show()
 
 
 #diagnostics
-pl.plot(t_axis_f/1000, comp1[:], color='r', label = 'component1')
-pl.plot(t_axis_f/1000, comp2[:], color='r', label = 'component2')
-pl.plot(t_axis_f/1000, comp3[:], color='r', label = 'component3')
-pl.grid(True)
-pl.show()
+# pl.plot(t_axis_f/1000, comp1[:], color='r', label = 'component1')
+# pl.plot(t_axis_f/1000, comp2[:], color='r', label = 'component2')
+# pl.plot(t_axis_f/1000, comp3[:], color='r', label = 'component3')
+# pl.grid(True)
+# pl.show()
 
 
 
