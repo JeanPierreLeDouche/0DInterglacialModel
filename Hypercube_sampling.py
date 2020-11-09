@@ -6,13 +6,10 @@ Created on Tue Oct 27 11:15:05 2020
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-import numpy as np
 import matplotlib.pyplot as pl
 import time as tim 
 from smt.sampling_methods import LHS
 import random as r
-import numpy as np
 import matplotlib.pyplot as pl
 import time as tim 
 import itertools 
@@ -337,7 +334,7 @@ def main_sim(coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, runtime, timestep
         # save these values to their respective array
         # T_o_arr[t//10] = T_o
         T_s_arr[t//10] = T_s
-        # D_arr[t//10] = D
+        D_arr[t//10] = D
         
         # I_arr[t//10] = I
         CO2_arr[t//10] = CO2
@@ -351,7 +348,7 @@ def main_sim(coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, runtime, timestep
         # comp2[t//10] = T_surface[2]
         # comp3[t//10] = T_surface[3]
         
-    return  CO2_arr, T_s_arr, m_arr, coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, m_abl_arr, s_abl_arr, acc_arr
+    return  CO2_arr, T_s_arr, m_arr, coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, m_abl_arr, s_abl_arr, acc_arr, D_arr
 
 #%%
 
@@ -510,9 +507,9 @@ for iterations in range(n_iterations):
 
 #%%
 
-convergence =[[-3.429026877618254e-08, -3.284908152775856e-08], [7.600968075006228e-06, 7.619948703857776e-06], [4.30064035894757, 4.329378514930551], [17128.432758757306, 17221.052023211218], [0.00023493951219539925, 0.000235504085548756], [8.166071070825304e-07, 8.210311295240493e-07], [1.1669438534883839e-07, 1.173159418027155e-07]], [[170.45547459729033, 170.4930341028549], [0.01590540755213834, 0.015945427214500922], [5.435044243534025e-10, 5.465127657592211e-10], [6.709237140166336, 6.717692576321634]], [[1.9059418888140895e-07, 1.9116556645556428e-07]], [[1.5165865166114276e-09, 1.5586735547690592e-09], [10628.316036470802, 10677.782640351254]], [[101.6296089813385, 103.54987515467386], [9.754663736135143, 9.7615752969318], [81.62267943797907, 81.65721163994233]]
+convergence =[[-5.2554710023224535e-08, -5.169317722214472e-08], [4.616174600033403e-06, 4.617792443695328e-06], [2.7327221022183767, 2.734014370139681], [19717.785156013582, 19764.46577346841], [0.0002607090804260154, 0.0002616658049150665], [5.266512329133398e-07, 5.275536761394582e-07], [5.305166137389649e-08, 5.306440395586644e-08]], [[187.3144935107853, 187.31808036388622], [0.013853985929218283, 0.013856092970440709], [4.795959967980203e-10, 4.8237337245646e-10], [6.740785212069891, 6.741575360323851]], [[1.4046733634617235e-06, 1.4070671245565839e-06]], [[5.1107423603203495e-09, 5.158247163052503e-09], [7980.424463234158, 7989.80634603687]], [[104.42086202589049, 105.4241984618871], [5.377925173993712, 5.3784332584661305], [84.68600335059133, 84.68874833814618]]
+conv_score = 468.9
 
-conv_score = 314.0
 
 
 aa = np.mean(np.asarray(convergence[0]), axis=1)
@@ -558,6 +555,7 @@ m_arr= run_conv[2]
 m_abl = run_conv[8]
 s_abl = run_conv[9]
 acc = run_conv[10]
+
     
 # pl.plot(t_axis_f, m_arr*Gt_to_SLE_conv, color='cyan', label = 'ice mass')
 pl.plot(t_axis_f/1000,m_abl*Gt_to_SLE_conv, color='red', label = 'm abl ')
@@ -567,6 +565,16 @@ pl.title('? run, score: '+str(conv_score), fontsize = 20)
 pl.xlabel('time [ka]', fontsize=14)
 pl.ylabel('ice mass change [m SLE / 10 yr]', fontsize=14)
 pl.legend()
+pl.grid(True)
+pl.show()
+#%%
+
+pl.plot(t_axis_f/1000, run_conv[11], color='grey', label = 'acc')
+pl.title('run 0, score: '+str(conv_score), fontsize = 20)
+pl.xlabel('time [ka]', fontsize=20)
+pl.ylabel('surface depression [m]', fontsize=20)
+pl.xticks(fontsize = 15)
+pl.yticks(fontsize = 15)
 pl.grid(True)
 pl.show()
 
